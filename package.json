@@ -13,6 +13,7 @@
     "react-native-button": "^1.6.0",
     "react-native-gifted-spinner": "^0.1.0",
     "react-native-image-picker": "^0.21.5",
+    "react-native-router-flux": "^3.35.0",
     "react-native-vector-icons": "^2.0.3"
   }
 }

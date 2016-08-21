@@ -14,11 +14,10 @@ import {
   BackAndroid,
 } from 'react-native';
 
-import Button from 'react-native-button';
-import Registration from './Registration';
+import kd from './keyboarddismiss'
 import Config from './config';
 import GiftedSpinner from 'react-native-gifted-spinner';
-import Modal from './Modal';
+import { Actions } from 'react-native-router-flux';
 
 
 const STORAGE_KEY = "@TBP:user";
@@ -52,17 +51,17 @@ class Login extends Component {
 
   render() {
     return (
-        <View style={{flex: 1, backgroundColor: "#FFFFFF"}}>
+        <View style={{flex: 1, backgroundColor: "#FFFFFF"}} keyboardShouldPersistTaps={false}>
           
-          <ScrollView style={{flex:1}} keyboardShouldPersistTaps={false}>
-
+          
+          <ScrollView style={{flex:1}} keyboardShouldPersistTaps={true}>
             <View style={{height: 200, justifyContent: 'center', alignItems: 'center',}}>
     				 <Image source={require('../images/TajLogo.jpg')} style={styles.base}></Image>
             </View>   
+            
+            <View style={{margin: 16, padding: 8}} keyboardShouldPersistTaps={true}>
 
-            <View style={{margin: 16, padding: 8}}>
-
-    		    	<View>
+    		    	<View keyboardShouldPersistTaps={true}>
                   <Text>Email</Text>
     		    			<TextInput
     		    				 ref="1"
@@ -71,12 +70,16 @@ class Login extends Component {
     		    				 style={styles.formInput}
     		    				 blurOnSubmit={false}
                      returnKeyType="next"
-                     onSubmitEditing={() => this.focusNextField('2')}
+                      onSubmitEditing={() => {if (!this.validateEmail(this.state.email)) {
+                                      alert("Please enter a Valid Email Id")
+                                    } else {
+                                  this.focusNextField('2');
+                              }}}
     		    				 onChange={(event) => this.setState({email: event.nativeEvent.text})}
     		    				 >
     		    			</TextInput>
     		    	</View>
-              <View>
+              <View keyboardShouldPersistTaps={true}>
     		    			<Text>Password</Text>
     		    			<TextInput
     		    				 ref="2"
@@ -92,9 +95,9 @@ class Login extends Component {
 	    			
             <View style={{flexDirection: 'row'}}>	
             
-              <View style={{flex: 1}}>
+              <View style={{flex: 1}} keyboardShouldPersistTaps={true}>
   	    				<TouchableHighlight
-  	    					onPress={ ()=> this.props.toRegister()} 
+  	    					onPress={ ()=> Actions.register()} 
   	    						style={styles.button}>
   	    					<Text style={styles.buttonText}>Register</Text>
   	    				</TouchableHighlight>
@@ -114,24 +117,19 @@ class Login extends Component {
                 </TouchableHighlight> 
               </View> 
               </View>
-             </View> 
-             </ScrollView>  
-
-            <Modal
-               offset={this.state.offset}
-               open={this.state.loading}
-               closeOnTouchOutside={false}
-               style={{alignItems: 'center'}}>
-               <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: 'transparent'}}>
-                 <GiftedSpinner/>
-                 <Text>Signing In..</Text>
-               </View>
-            </Modal>
+             </View>  
+            </ScrollView>
   			</View>
 
 
     );
   }
+
+  validateEmail = (email) => {
+      var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+  };
+
 
   async _removeStorage() {
     try {
@@ -153,8 +151,8 @@ class Login extends Component {
   }
 
   _login(){
-
-    if(this.state.email || this.state.password !== ''){
+    kd();
+    if(this.state.email || this.state.password !== '' && this.validateEmail(this.state.email)){
       this.setState({
         signing: "checking..",
         loading: true
@@ -167,10 +165,11 @@ class Login extends Component {
                 signing: "Logging in .." + successIcon
             })
             this._storeUser(responseJson.Android[0].userid).done(() => {
-              this.props.toHome();
+              Actions.home({type: 'reset'});
+              Actions.refresh();
             })   
         } else {
-          alert("unsuccessfull, Please check your credentials")
+          alert("Unsuccessfull, Please check your credentials")
           this.setState({
             loading: false,
             signing: 'Sign In'

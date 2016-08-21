@@ -13,10 +13,11 @@ import {
   TouchableHighlight,
 } from 'react-native';
 
-import TextField from 'react-native-md-textinput';
 import Config from './config';
 import GiftedSpinner from 'react-native-gifted-spinner';
 const STORAGE_KEY = '@TBP:user';
+import { Actions } from 'react-native-router-flux';
+
 
 var onBack;
 
@@ -36,8 +37,7 @@ class AddContact extends Component {
   }
 
   componentDidMount(){
-    this._fetchUserId();
-    onBack = this.props.onBack;
+    
   }
 
   async _fetchUserId(){
@@ -64,53 +64,51 @@ class AddContact extends Component {
   render() {
     return (
       <View style={styles.container}>
-      	<Text>Add Contact</Text>
 
         <View style={{flex: 1, padding: 16}}>
         <ScrollView keyboardShouldPersistTaps={true}>
 
-          <TextField 
-            label={'Name'} 
-            highlightColor={'#00BCD4'} 
-            onChange={(event) => this.setState({name: event.nativeEvent.text})}
-            value={this.state.name}
-            returnKeyType="next"
-            />
-          <TextField 
-            label={'Contact'} 
-            highlightColor={'#00BCD4'} 
-            keyboardType="numeric"
-            onChange={(event) => this.setState({contact: event.nativeEvent.text})}
-            value={this.state.contact}
-            returnKeyType="next"
-            />
-          <TextField 
-            label={'Email'} 
-            highlightColor={'#00BCD4'}
+          <Text>Name</Text>
+            <TextInput
+              onChange={(event)=> this.setState({name: event.nativeEvent.text})}
+              value={this.state.name}
+              autoCapitalize="words"
+              returnKeyType="next"
+              />
+
+          <Text>Contact</Text>
+            <TextInput 
+                keyboardType="numeric"
+                onChange={(event) => this.setState({contact: event.nativeEvent.text})}
+                value={this.state.contact}
+                returnKeyType="next"
+                />
+        
+          <Text>Email</Text>
+          <TextInput 
             keyboardType="email-address" 
             onChange={(event) => this.setState({email: event.nativeEvent.text})}
             value={this.state.email}
             returnKeyType="next"
             />
-          <TextField 
-            label={'Area'} 
-            highlightColor={'#00BCD4'} 
+
+          <Text>Area</Text>
+          <TextInput 
             onChange={(event) => this.setState({area: event.nativeEvent.text})}
             value={this.state.area}
-            returnKeyType="next"
+            returnKeyType="done"
             />
-
           <View style={{height: 10}} />
 
           <TouchableHighlight
             onPress={() => this._saveContact()}
-            style = {styles.buttonWrapper}>
+            style = {styles.button}>
               
               <View>
 
               {this.state.isLoading ? 
                 (<GiftedSpinner/>) : 
-                (<Text>Save Contact</Text>)
+                (<Text style={styles.buttonText}>Save Contact</Text>)
               }
 
               </View>
@@ -125,31 +123,43 @@ class AddContact extends Component {
   }
 
 _saveContact() {
-    this.setState({
-      isLoading: true,
-    })
 
-    this._saveContacttoServer(this.state.name, 
-        this.state.contact, this.state.email, 
-        this.state.area).done((response) => {
-          if (response) {
-            if (JSON.parse(response.Android[0].result == "Success")) {
-              // Success
-               alert(JSON.stringify(response.Android[0].msg))
-              this.props.toHome();
-            } else {
-              // Error
-            }
-          } else {
-            // Some Error
-          }
-          this.setState({
-            isLoading: false,
-          })
-
-        })
-
+    if (this.state.name && this.state.email && this.state.contact && this.state.area) {
+              this.setState({
+                isLoading: true,
+              })
+              this._fetchUserId().done(() => {
+              this._saveContacttoServer(this.state.name, 
+                  this.state.contact, this.state.email, 
+                  this.state.area).done((response) => {
+                    if (response) {
+                      if (JSON.parse(response.Android[0].result == "Success")) {
+                        // Success
+                         alert(JSON.stringify(response.Android[0].msg))
+                         Actions.home({type: 'reset'});
+                         Actions.refresh();
+                      } else {
+                        // Error
+                      }
+                    } else {
+                      // Some Error
+                    }
+                    this.setState({
+                      isLoading: false,
+                    })
+      
+                  })
+                  })
+        }
+      else {
+        alert("Please Enter Proper Credentials")
+      }
   }
+
+validateEmail = (email) => {
+      var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+};
 
 async _saveContacttoServer(name, contact, email, area) {
   try {
@@ -163,19 +173,57 @@ async _saveContacttoServer(name, contact, email, area) {
     return false;
   }
 }
+}
 
-
+class WithLabel extends Component {
+  render() {
+    return ( 
+        <View style={styles.labelContainer}>
+          <View style={styles.label}>
+            <Text>{this.props.label}</Text>
+          </View>
+          {this.props.chidren}
+        </View>
+      );
+  }
 }
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+    marginTop: 56
 	},
   buttonWrapper: {
         alignItems: 'center',
         padding: 20,
         backgroundColor: '#e5e5e5'
     },
+     labelContainer: {
+    flexDirection: 'row',
+    marginVertical: 2,
+    flex: 1,
+  },
+  label: {
+    width: 115,
+    alignItems: 'flex-end',
+    marginRight: 10,
+    paddingTop: 2,
+  },
+  button: {
+      height: 48,
+      flex: 1,
+      backgroundColor: "transparent",
+      borderColor: "#456fb0",
+      borderWidth: 1,
+      borderRadius: 8,
+      marginTop: 10,
+      justifyContent: "center"
+  },
+  buttonText: {
+      fontSize: 15,
+      color: "#212121",
+      alignSelf: "center"
+  },
 });
 
 

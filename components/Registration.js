@@ -17,10 +17,14 @@ import {
 } from 'react-native';
 
 const STORAGE_KEY = "@TBP:user";
+import k from './keyboarddismiss'
 import Config from './config';
 import GiftedSpinner from 'react-native-gifted-spinner';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Actions } from 'react-native-router-flux';
 const imageUploadIcon = (<Icon name="add-a-photo" size={30} color="#4F4F4F"/>)
+const tick = (<Icon name="check" size={15} color="#2b2b2b"/>)
+const wrong = (<Icon name="eroor" size={15} color="#2b2b2b"/>)
 
 var ImagePicker = require('react-native-image-picker');
 
@@ -58,11 +62,10 @@ class Registration extends Component {
     	base64avatar: '',
     	imageData: '',
     	fileURL: '',
-    	curText: '<No Event>',
-	  	prevText: '<No Event>',
-	  	prev2Text: '<No Event>',
-	  	prev3Text: '<No Event>',
+      cpassword: '',
     	uploading: 'Uploading..',
+      cp : false,
+      showcp: false,
       };
   }
 
@@ -117,52 +120,58 @@ _pickImage() {
   	})
   }
   _submit() {
-  	this.setState({
-  		loading : true,
-  	})
+    k();
+  	if(this.state.name && this.state.email && this.state.password && this.state.mobile_no 
+        && this.state.address && this.state.adharcard_no && this.state.pancard_no
+        && this.state.fileURL && this.state.occupation && this.validateEmail(this.state.email)) {
 
-  	var photo = {
-  			uri: this.state.fileURL,
-  			type: 'image/jpg',
-  			name: this.state.name+".jpg"
-  		}
-	var body = new FormData();
-	body.append('image', photo);
-	body.append('name', this.state.name);
-	body.append('address', this.state.address);
-	body.append('mobile_no', this.state.mobile_no);
-	body.append('alt_mobile_no', this.state.alt_mobile_no);
-	body.append('email', this.state.email);
-	body.append('password', this.state.password);
-	body.append('pancard_no', this.state.pancard_no);
-	body.append('adharcard_no', this.state.adharcard_no);
-	body.append('occupation', this.state.occupation);
-	body.append('passport_no', this.state.passport_no);
-	body.append('referancename', this.state.referancename)
-	body.append('firebaseid', "");
-	var xhr = new XMLHttpRequest();
-	xhr.open('POST', Config.api+ "/user-register");
-	xhr.onload = () => {
-		if(xhr.status !== 200) {
-			alert("Failed : Some Error Occured Please check your credentials again")
-			this.setState({
-				loading: false
-			})
-			return;
-		};
-		if(JSON.parse(xhr.responseText).Android[0].result == "Success") {
-			this.setState({
-				uploading: 'Logging In'
-			})
-			this._storeUser(JSON.parse(xhr.responseText).Android[0].user_id)
-					.done(()=> {
-						this.props.toHome();
-					})
-		}
-
-		this.setState({
-			loading: false
-		})
+      this.setState({
+          loading : true,
+        })
+    
+        var photo = {
+            uri: this.state.fileURL,
+            type: 'image/jpg',
+            name: this.state.name+".jpg"
+          }
+      var body = new FormData();
+      body.append('image', photo);
+      body.append('name', this.state.name);
+      body.append('address', this.state.address);
+      body.append('mobile_no', this.state.mobile_no);
+      body.append('alt_mobile_no', this.state.alt_mobile_no);
+      body.append('email', this.state.email);
+      body.append('password', this.state.password);
+      body.append('pancard_no', this.state.pancard_no);
+      body.append('adharcard_no', this.state.adharcard_no);
+      body.append('occupation', this.state.occupation);
+      body.append('passport_no', this.state.passport_no);
+      body.append('referancename', this.state.referancename)
+      body.append('firebaseid', "");
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', Config.api+ "/user-register");
+      xhr.onload = () => {
+        if(xhr.status !== 200) {
+          alert("Failed : Some Error Occured Please check your credentials again")
+          this.setState({
+            loading: false
+          })
+          return;
+        };
+        if(JSON.parse(xhr.responseText).Android[0].result == "Success") {
+          this.setState({
+            uploading: 'Logging In'
+          })
+          this._storeUser(JSON.parse(xhr.responseText).Android[0].user_id)
+              .done(()=> {
+                Actions.home();
+              })
+        } else {
+             alert("Failed: \n" + JSON.parse(xhr.responseText).Android[0].msg)
+             this.setState({
+              loading: false
+            })
+        }
 	};
 
 	if (xhr.upload) {
@@ -175,8 +184,10 @@ _pickImage() {
 		};
 	}
 	xhr.send(body);
-
+ } else {
+    alert("Please fill proper credentials")
  }
+}
 
  	async _storeUser(userId) {
  		try{ 
@@ -189,13 +200,21 @@ _pickImage() {
  		}
  	}
 
+  confirmPassword() {
+    if (this.state.password == this.state.cpassword) 
+      return true 
+      else
+       return false
+  }
+
 
   render() {
     return (
-    	
-      	<ScrollView style={styles.container} keyboardShouldPersistTaps={true}>
+    	 
+          <View style={styles.container}>
+      	<ScrollView keyboardShouldPersistTaps={true} >
       		
-      		<View style={{flex:1, height: 150, margin: 20,}} >
+      		<View style={{flex:1, height: 150, margin: 16,}} >
       			<TouchableOpacity style={styles.onPressImage} onPress = {() => this._pickImage()} >
       			{
       				this.state.noAvatarYet ? (
@@ -212,8 +231,9 @@ _pickImage() {
       				}
       			</TouchableOpacity>
       		</View>
-        	<Text>Name</Text>
-        	
+
+          <Text>Name</Text>
+          
         	<TextInput
         		ref="1"
         		onChange={(event) => this.setState({
@@ -260,6 +280,40 @@ _pickImage() {
         		ref="3"
 	      	    onSubmitEditing={() => this.focusNextField('4')}/>
 	      	    
+
+          <Text>Confirm Password  
+          {
+            this.state.showcp 
+            ? ( this.state.cp 
+              ? 
+              (<Icon name="check" size={15} color="#2b2b2b"/>) 
+              : 
+              (<Icon name="error" size={15} color="#2b2b2b"/>)
+            
+            ) : (<Text></Text>)}</Text>
+          
+          <TextInput
+            onChange={(event) => {this.setState({
+              cpassword: event.nativeEvent.text,
+              showcp: true
+            }); 
+            if(this.state.password == event.nativeEvent.text){
+              this.setState({
+                cp : true,
+              })
+            } else {
+              this.setState({
+                cp: false,
+              })
+            }
+          }}
+            secureTextEntry={true}
+            value={this.state.cpassword}
+            returnKeyType="next"
+            blurOnSubmit={false}
+            style={styles.textInput}
+            ref="4"
+              onSubmitEditing={() => this.confirmPassword() ? this.focusNextField('5') : alert("Password didn't match")}/>
 
         	<Text>Mobile No</Text>
         	
@@ -389,6 +443,7 @@ _pickImage() {
         		</View>
         		</TouchableHighlight>
         </ScrollView>
+            </View>
       
     );
   }
@@ -397,6 +452,7 @@ _pickImage() {
 const styles = StyleSheet.create({
 	 container: {
 	    padding: 16,
+      marginTop: 36,
 	    flex: 1, 
 	    backgroundColor: '#ffffff',
 	  },
