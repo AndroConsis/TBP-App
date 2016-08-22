@@ -41,6 +41,10 @@ class Login extends Component {
     };
   }
 
+  componentDidMount() {
+      this._removeStorage();
+    }
+
   focusNextField(nextField) { 
   	this.refs[nextField].focus(); 
   }
@@ -52,6 +56,11 @@ class Login extends Component {
   render() {
     return (
         <View style={{flex: 1, backgroundColor: "#FFFFFF"}} keyboardShouldPersistTaps={false}>
+          <View style={[styles.fixed]}>
+            <Image
+                  source={require('../images/app_bg.png')}
+                  style={{resizeMode: 'stretch'}}/>
+          </View>
           
           
           <ScrollView style={{flex:1}} keyboardShouldPersistTaps={true}>
@@ -97,7 +106,7 @@ class Login extends Component {
             
               <View style={{flex: 1}} keyboardShouldPersistTaps={true}>
   	    				<TouchableHighlight
-  	    					onPress={ ()=> Actions.register()} 
+  	    					onPress={ ()=> {this._toRegister()}} 
   	    						style={styles.button}>
   	    					<Text style={styles.buttonText}>Register</Text>
   	    				</TouchableHighlight>
@@ -125,6 +134,14 @@ class Login extends Component {
     );
   }
 
+  _toRegister() {
+    this.setState({
+      email: '',
+      password: '',
+    })
+    Actions.register();
+  }
+
   validateEmail = (email) => {
       var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(email);
@@ -133,9 +150,12 @@ class Login extends Component {
 
   async _removeStorage() {
     try {
-      await AsyncStorage.setItem('STORAGE_KEY', JSON.stringify({}));
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({
+        userId: "",
+        logged: false
+      }))
     } catch (error) {
-
+      console.log('AsyncStorage error: '+ error.message);
     }
   }
 
@@ -182,9 +202,7 @@ class Login extends Component {
 
   }
 
-  componentDidMount() {
-      this._removeStorage();
-    }
+  
 }
 
 
@@ -228,16 +246,14 @@ const styles = StyleSheet.create({
     button: {
       height: 48,
       flex: 1,
-      backgroundColor: "transparent",
-      borderColor: "#456fb0",
-      borderWidth: 1,
-      borderRadius: 8,
+      backgroundColor: "#0680cd",
       marginTop: 10,
       justifyContent: "center"
   },
   buttonText: {
       fontSize: 15,
-      color: "#212121",
+      color: "#FAFAFA",
+      fontWeight: "bold",
       alignSelf: "center"
   },
   buttonContainer: {
@@ -247,6 +263,14 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
   },
+  fixed: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.5,
+  }
 });
 
 

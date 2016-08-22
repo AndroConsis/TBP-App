@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 
 const STORAGE_KEY = "@TBP:user";
-import k from './keyboarddismiss'
+import k from './keyboarddismiss';
 import Config from './config';
 import GiftedSpinner from 'react-native-gifted-spinner';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -96,11 +96,6 @@ _pickImage() {
   			this.setState({
   				imageData : response.data,
   			});
-  			// const source ='data:image/jpg;base64,'+ response.data;  			
-  			// this.setState({
-  			// 	base64avatar: source,
-  			// });
-  			
 
   			if (Platform.OS === 'ios') {
   				const imageUrl = response.uri.replace('file://','');
@@ -457,21 +452,20 @@ const styles = StyleSheet.create({
 	    backgroundColor: '#ffffff',
 	  },
 	  button: {
-        height: 48,
-        flex: 1,
-        backgroundColor: "transparent",
-        borderColor: "#555555",
-        borderWidth: 1,
-        borderRadius: 8,
-        marginTop: 10,
-        justifyContent: "center"
-      },
-      buttonText: {
-        fontSize: 18,
-        color: "#212121",
-        alignSelf: "center"
-   	 },
-   	 onPressImage : {
+      height: 48,
+      flex: 1,
+      backgroundColor: "#0680cd",
+      marginTop: 10,
+      justifyContent: "center"
+  },
+  buttonText: {
+      fontSize: 15,
+      color: "#FAFAFA",
+      fontWeight: "bold",
+      alignSelf: "center"
+    },
+
+   	onPressImage : {
    	 	flex: 1, height: 150, 
    	 	borderRadius: 50, 
    	 	alignItems: 'center', 

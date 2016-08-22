@@ -16,6 +16,7 @@ import {
 import Config from './config';
 import GiftedSpinner from 'react-native-gifted-spinner';
 const STORAGE_KEY = '@TBP:user';
+import k from './keyboarddismiss';
 import { Actions } from 'react-native-router-flux';
 
 
@@ -51,14 +52,24 @@ class AddContact extends Component {
             userId: user.userId,
           })
       } else {
-        // Credentials Expired
+        alert("Session Expired! ")
+        Actions.login({type: 'reset'});
+        Actions.refresh();
       }
     } else {
       // Credentials Expired
-    }}
-    catch(error){
+      alert("Session Expired! ")
+        Actions.login({type: 'reset'});
+        Actions.refresh();
+    }
+  }
+  catch(error){
       alert("Error in fetch User id  "+ error.message)
     }
+  }
+
+  focusNextField(nextField) {
+    this.refs[nextField].focus();
   }
 
   render() {
@@ -70,33 +81,41 @@ class AddContact extends Component {
 
           <Text>Name</Text>
             <TextInput
+              ref="1"
               onChange={(event)=> this.setState({name: event.nativeEvent.text})}
               value={this.state.name}
               autoCapitalize="words"
               returnKeyType="next"
+              onSubmitEditing={() => this.focusNextField('2')}
               />
 
           <Text>Contact</Text>
-            <TextInput 
+            <TextInput
+                ref="2" 
                 keyboardType="numeric"
                 onChange={(event) => this.setState({contact: event.nativeEvent.text})}
                 value={this.state.contact}
                 returnKeyType="next"
+                onSubmitEditing={() => this.focusNextField('3')}
                 />
         
           <Text>Email</Text>
           <TextInput 
+            ref="3"
             keyboardType="email-address" 
             onChange={(event) => this.setState({email: event.nativeEvent.text})}
             value={this.state.email}
             returnKeyType="next"
+            onSubmitEditing={() => this.focusNextField('4')}
             />
 
           <Text>Area</Text>
-          <TextInput 
+          <TextInput
+            ref="4" 
             onChange={(event) => this.setState({area: event.nativeEvent.text})}
             value={this.state.area}
             returnKeyType="done"
+            onSubmitEditing={() => this._saveContact()}
             />
           <View style={{height: 10}} />
 
@@ -123,7 +142,7 @@ class AddContact extends Component {
   }
 
 _saveContact() {
-
+    k();
     if (this.state.name && this.state.email && this.state.contact && this.state.area) {
               this.setState({
                 isLoading: true,
@@ -209,19 +228,17 @@ const styles = StyleSheet.create({
     marginRight: 10,
     paddingTop: 2,
   },
-  button: {
+   button: {
       height: 48,
       flex: 1,
-      backgroundColor: "transparent",
-      borderColor: "#456fb0",
-      borderWidth: 1,
-      borderRadius: 8,
+      backgroundColor: "#0680cd",
       marginTop: 10,
       justifyContent: "center"
   },
   buttonText: {
       fontSize: 15,
-      color: "#212121",
+      color: "#FAFAFA",
+      fontWeight: "bold",
       alignSelf: "center"
   },
 });

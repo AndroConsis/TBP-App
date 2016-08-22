@@ -21,64 +21,103 @@ import Login from './components/Login';
 import Registration from './components/Registration';
 import Home from './components/Home';
 import AddContact from './components/AddContact';
+import GiftedSpinner from 'react-native-gifted-spinner';
+
 
 const STORAGE_KEY = "@TBP:user";
 
 import {Scene, Router} from 'react-native-router-flux';
 
-const { 
-  CardStack: NavigationCardStack, 
-  StateUtils: NavigationStateUtils, 
-} = NavigationExperimental;
-
-
-function popit(cs){ 
-  return NavigationStateUtils.pop(cs)
-}
-
-
-function createReducer(initialState){
-   
-  return (currentState = initialState, action) => {
-    switch (action.type) {
-        case 'push':
-                 return NavigationStateUtils.push(
-                    currentState, {key: 
-                    action.key});
-      case 'pop':
-        return currentState.index > 0 ?
-          NavigationStateUtils.pop(currentState) : currentState ;
-      default: 
-        return currentState;
-    }
-  }
-}
-
-const NavReducer = createReducer({
-                      index: 0,
-                      key: 'Login',
-                      routes: [{key: 'Login'}]
-                    });
-
-
 class TBP extends Component {
   
   constructor(props, context) {
     super(props, context);
+    this.state = {
+      isLoading : true,
+      foundUserId : false,
+    };
+  }
+
+  componentDidMount(){
+   AsyncStorage.getItem(STORAGE_KEY).then((response) => {
+       
+    if(response !== null) {
+        
+      if(JSON.parse(response).logged !== true) {
+          this.setState({
+            isLoading: false,
+            foundUserId: true,
+          })
+      } else {
+        this.setState({
+          isLoading : false,
+          foundUserId: false,
+        })
+      }
+    } else {
+        this.setState({
+          isLoading : false,
+          foundUserId: false,
+        })
+      }
+    }
+  )
+   .catch((error) => {
+      this.setState({
+        isLoading : false,
+        foundUserId: false,
+      });
+   })
+   .done();
   }
 
   render() {
-    return (
+     if(this.state.isLoading){
+      return this._renderLoadingView()
+    } else { 
+      if(this.state.foundUserId) {
+        return  this._renderHomePage()
+      } else {
+        return this._renderLoginPage()
+      } 
+    }
+   }
+
+_renderHomePage() {
+    return(
         <Router>
           <Scene key="root">
-            <Scene key="login" component={Login} title="Login" hideNavBar={true} />
+            <Scene key="login" component={Login} title="Login" hideNavBar={true} initial={true} />
             <Scene key="register" component={Registration} hideNavBar={false} title="Register"/>
             <Scene key="home" component={Home} hideNavBar={false} title="Contacts"/>
             <Scene key="addContact" component={AddContact} hideNavBar={false} title="Add Contact"/>
           </Scene>
         </Router>
-       ); 
-     }
+      )
+}
+
+_renderLoginPage() {
+    return (
+        <Router>
+          <Scene key="root">
+            <Scene key="home" component={Home} hideNavBar={false} title="Contacts" initial={true}/>
+            <Scene key="login" component={Login} title="Login" hideNavBar={true} />
+            <Scene key="register" component={Registration} hideNavBar={false} title="Register"/>
+            <Scene key="addContact" component={AddContact} hideNavBar={false} title="Add Contact"/>
+          </Scene>
+        </Router>
+      )
+}
+
+
+
+_renderLoadingView() {
+  return (
+      <View style={{flex:1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+        <GiftedSpinner/>
+      </View>
+    );
+}
 }
 
 const styles = StyleSheet.create({ 
@@ -93,8 +132,3 @@ const styles = StyleSheet.create({
 });
 
 AppRegistry.registerComponent('TBP', () => TBP);
-
-// <NavigationCardStack
-//           navigationState = {this.state.navState}
-//           onNavigate={this._handleAction.bind(this)}
-//           renderScene = {this._renderScene.bind(this)} />
