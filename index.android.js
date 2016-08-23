@@ -29,7 +29,25 @@ import Spinner from './components/Modal';
 const STORAGE_KEY = "@TBP:user";
 
 
-import {Scene, Router} from 'react-native-router-flux';
+import {Actions, Scene, Router} from 'react-native-router-flux';
+
+const sceneNewUser = Actions.create(
+    <Scene key="root">
+        <Scene key="login" component={Login} title="Login" hideNavBar={true} initial={true} />
+        <Scene key="home" component={Home} hideNavBar={false} title="Contacts"/>
+        <Scene key="register" component={Registration} hideNavBar={false} title="Register"/>
+        <Scene key="addContact" component={AddContact} hideNavBar={false} title="Add Contact"/>
+    </Scene>
+);
+
+const scenePreviousUser = Actions.create(
+    <Scene key="root">
+        <Scene key="home" component={Home} hideNavBar={false} title="Contacts" initial={true}/>
+        <Scene key="register" component={Registration} hideNavBar={false} title="Register"/>
+        <Scene key="login" component={Login} title="Login" hideNavBar={true} />
+        <Scene key="addContact" component={AddContact} hideNavBar={false} title="Add Contact"/>
+    </Scene>
+);
 
 class TBP extends Component {
   
@@ -45,9 +63,10 @@ class TBP extends Component {
   componentDidMount(){
     StatusBar.setBackgroundColor('#2A527C', true);
     setTimeout( () => {
-      this._checkUser();
+      
     }, 5000);
     setTimeout( () => {
+      this._checkUser();
       this.setState({
         spinnerLoading : true 
       })
@@ -56,10 +75,9 @@ class TBP extends Component {
 
   _checkUser() {
     AsyncStorage.getItem(STORAGE_KEY).then((response) => {
-       
+      
     if(response !== null) {
-        
-      if(JSON.parse(response).logged !== true) {
+      if(JSON.parse(response).logged == true) {
           this.setState({
             isLoading: false,
             foundUserId: true,
@@ -77,6 +95,7 @@ class TBP extends Component {
         })
       }
     }
+
   )
    .catch((error) => {
       this.setState({
@@ -101,29 +120,13 @@ class TBP extends Component {
 
 _renderHomePage() {
     return(
-
-        <Router>
-          <Scene key="root">
-            <Scene key="login" component={Login} title="Login" hideNavBar={true} initial={true} />
-            <Scene key="register" component={Registration} hideNavBar={false} title="Register"/>
-            <Scene key="home" component={Home} hideNavBar={false} title="Contacts"/>
-            <Scene key="addContact" component={AddContact} hideNavBar={false} title="Add Contact"/>
-          </Scene>
-        </Router>
+        <Router scenes={scenePreviousUser}/>
       )
 }
 
 _renderLoginPage() {
     return (
-
-        <Router>
-          <Scene key="root">
-            <Scene key="home" component={Home} hideNavBar={false} title="Contacts" initial={true}/>
-            <Scene key="login" component={Login} title="Login" hideNavBar={true} />
-            <Scene key="register" component={Registration} hideNavBar={false} title="Register"/>
-            <Scene key="addContact" component={AddContact} hideNavBar={false} title="Add Contact"/>
-          </Scene>
-        </Router>
+        <Router scenes={sceneNewUser}/> 
       )
 }
 
