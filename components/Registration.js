@@ -25,6 +25,7 @@ import { Actions } from 'react-native-router-flux';
 const imageUploadIcon = (<Icon name="add-a-photo" size={30} color="#4F4F4F"/>)
 const tick = (<Icon name="check" size={15} color="#2b2b2b"/>)
 const wrong = (<Icon name="eroor" size={15} color="#2b2b2b"/>)
+import Spinner from './Modal';
 
 var ImagePicker = require('react-native-image-picker');
 
@@ -206,8 +207,14 @@ _pickImage() {
   render() {
     return (
     	 
-          <View style={styles.container}>
-      	<ScrollView keyboardShouldPersistTaps={true} >
+        <View style={styles.container}>
+      	  <View style={[styles.fixed, {flex:1}]}>
+            <Image
+                  source={require('../images/app_bg.png')}
+                  style={{flex: 1 ,width: null,height: null,resizeMode: 'stretch',}}/>
+                  <Spinner visible={this.state.loading} />
+          </View>
+        <ScrollView keyboardShouldPersistTaps={true} >
       		
       		<View style={{flex:1, height: 150, margin: 16,}} >
       			<TouchableOpacity style={styles.onPressImage} onPress = {() => this._pickImage()} >
@@ -236,7 +243,7 @@ _pickImage() {
         		})}
         		autoCapitalize="words"
         		returnKeyType="next"
-        		blurOnSubmit={false}
+        		
         		style={styles.textInput}
        			onSubmitEditing={() => this.focusNextField('2')}
         		value={this.state.name}/>
@@ -250,7 +257,7 @@ _pickImage() {
         		keyboardType='email-address'
         		value={this.state.email}
         		returnKeyType="next"
-        		blurOnSubmit={false}
+        		
         		style={styles.textInput}
         		ref="2"
 	      	    onSubmitEditing={() => {if (!this.validateEmail(this.state.email)) {
@@ -270,7 +277,7 @@ _pickImage() {
         		secureTextEntry={true}
         		value={this.state.password}
         		returnKeyType="next"
-        		blurOnSubmit={false}
+        		
         		style={styles.textInput}
         		ref="3"
 	      	    onSubmitEditing={() => this.focusNextField('4')}/>
@@ -305,7 +312,7 @@ _pickImage() {
             secureTextEntry={true}
             value={this.state.cpassword}
             returnKeyType="next"
-            blurOnSubmit={false}
+            
             style={styles.textInput}
             ref="4"
               onSubmitEditing={() => this.confirmPassword() ? this.focusNextField('5') : alert("Password didn't match")}/>
@@ -320,10 +327,10 @@ _pickImage() {
         		keyboardType="numeric"
         		value={this.state.mobile_no}
         		returnKeyType="next"
-        		blurOnSubmit={false}
+        		
         		style={styles.textInput}
-        		ref="4"
-	      	    onSubmitEditing={() => this.focusNextField('5')}/>
+        		ref="5"
+	      	    onSubmitEditing={() => this.focusNextField('6')}/>
 	      	    
 
         	<Text>Alternative Mobile No</Text>
@@ -335,10 +342,10 @@ _pickImage() {
         		keyboardType="numeric"
         		value={this.state.alt_mobile_no}
         		returnKeyType="next"
-        		blurOnSubmit={false}
+        		
         		style={styles.textInput}
-        		ref="5"
-	      	    onSubmitEditing={() => this.focusNextField('6')}/>
+        		ref="6"
+	      	    onSubmitEditing={() => this.focusNextField('7')}/>
 	      	    
         	
         	<Text>Address</Text>
@@ -350,10 +357,10 @@ _pickImage() {
         		value={this.state.address}
         		multiline={true}
         		returnKeyType="next"
-        		blurOnSubmit={false}
+        		
         		style={styles.textInput}
-        		ref="6"
-	      	    onSubmitEditing={() => this.focusNextField('7')}/>
+        		ref="7"
+	      	  />
 	      	    
 
 
@@ -366,10 +373,10 @@ _pickImage() {
         		})}
         		value={this.state.adharcard_no}
         		returnKeyType="next"
-        		blurOnSubmit={false}
+        		
         		style={styles.textInput}
-        		ref="7"
-	      	    onSubmitEditing={() => this.focusNextField('8')}/>
+        		ref="8"
+	      	    onSubmitEditing={() => this.focusNextField('9')}/>
 	      	    
 
         	<Text>Pancard No</Text>
@@ -380,10 +387,10 @@ _pickImage() {
         		})}
         		value={this.state.pancard_no}
         		returnKeyType="next"
-        		blurOnSubmit={false}
+        		
         		style={styles.textInput}
-        		ref="8"
-	      	    onSubmitEditing={() => this.focusNextField('9')}/>
+        		ref="9"
+	      	    onSubmitEditing={() => this.focusNextField('10')}/>
 	      	    
         	
         	<Text>Occupation</Text>
@@ -394,10 +401,10 @@ _pickImage() {
         		})}
         		value={this.state.occupation}
         		returnKeyType="next"
-        		blurOnSubmit={false}
+        		
         		style={styles.textInput}
-        		ref="9"
-	      	    onSubmitEditing={() => this.focusNextField('10')}/>
+        		ref="10"
+	      	    onSubmitEditing={() => this.focusNextField('11')}/>
 	      	    
 
         	<Text>Passport No</Text>
@@ -408,10 +415,10 @@ _pickImage() {
         		})}
         		value={this.state.passport_no}
         		returnKeyType="next"
-        		blurOnSubmit={false}
+        		
         		style={styles.textInput}
-        		ref="10"
-	      	    onSubmitEditing={() => this.focusNextField('11')}/>
+        		ref="11"
+	      	    onSubmitEditing={() => this.focusNextField('12')}/>
 	      	    
         	<Text>Reference No</Text>
         	
@@ -421,9 +428,9 @@ _pickImage() {
         		})}
         		value={this.state.referancename}
         		returnKeyType="done"
-        		blurOnSubmit={false}
+        		
         		style={styles.textInput}
-        		ref="11"
+        		ref="12"
 	      	    onSubmitEditing={() => this._submit()}/>
 	      	    
         	
@@ -454,7 +461,7 @@ const styles = StyleSheet.create({
 	  button: {
       height: 48,
       flex: 1,
-      backgroundColor: "#0680cd",
+      backgroundColor: "#2A527C",
       marginTop: 10,
       justifyContent: "center"
   },
@@ -465,7 +472,7 @@ const styles = StyleSheet.create({
       alignSelf: "center"
     },
 
-   	onPressImage : {
+  onPressImage : {
    	 	flex: 1, height: 150, 
    	 	borderRadius: 50, 
    	 	alignItems: 'center', 
@@ -473,7 +480,15 @@ const styles = StyleSheet.create({
    	 },
    	 textInput: {
    	 	
-   	 }
+   	 },
+  fixed: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.2,
+  }
 });
 
 

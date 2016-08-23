@@ -23,6 +23,7 @@ import { Actions } from 'react-native-router-flux';
 const STORAGE_KEY = "@TBP:user";
 
 import Icon from 'react-native-vector-icons/Ionicons';
+import Spinner from './Modal';
 
 const myIcon = (<Icon name="ios-arrow-up-outline" size={25} color="#900" />)
 const successIcon = (<Icon name="ios-checkmark-outline" size={25} color="#900" />)
@@ -56,19 +57,19 @@ class Login extends Component {
   render() {
     return (
         <View style={{flex: 1, backgroundColor: "#FFFFFF"}} keyboardShouldPersistTaps={false}>
-          <View style={[styles.fixed]}>
+          <View style={[styles.fixed, {flex:1}]}>
             <Image
-                  source={require('../images/app_bg.png')}
-                  style={{resizeMode: 'stretch'}}/>
+                  source={require('../images/login_bg.png')}
+                  style={{flex: 1 ,width: null,height: null,resizeMode: 'stretch',}}/>
+                  <Spinner visible={this.state.loading} />
           </View>
-          
           
           <ScrollView style={{flex:1}} keyboardShouldPersistTaps={true}>
             <View style={{height: 200, justifyContent: 'center', alignItems: 'center',}}>
-    				 <Image source={require('../images/TajLogo.jpg')} style={styles.base}></Image>
+    				
             </View>   
             
-            <View style={{margin: 16, padding: 8}} keyboardShouldPersistTaps={true}>
+            <View style={{margin: 16, padding: 8, marginTop: 40}} keyboardShouldPersistTaps={true}>
 
     		    	<View keyboardShouldPersistTaps={true}>
                   <Text>Email</Text>
@@ -77,7 +78,6 @@ class Login extends Component {
     		    				 keyboardType={'email-address'}
     		    				 value={this.state.email}
     		    				 style={styles.formInput}
-    		    				 blurOnSubmit={false}
                      returnKeyType="next"
                       onSubmitEditing={() => {if (!this.validateEmail(this.state.email)) {
                                       alert("Please enter a Valid Email Id")
@@ -92,8 +92,7 @@ class Login extends Component {
     		    			<Text>Password</Text>
     		    			<TextInput
     		    				 ref="2"
-    		    				 secureTextEntry={true} 
-    		    				 blurOnSubmit={false}
+    		    				 secureTextEntry={true}
                      returnKeyType="done"
     		    				 placeholderTextColor="red"
                      onSubmitEditing={() => this._login()}
@@ -246,7 +245,7 @@ const styles = StyleSheet.create({
     button: {
       height: 48,
       flex: 1,
-      backgroundColor: "#0680cd",
+      backgroundColor: "#2A527C",
       marginTop: 10,
       justifyContent: "center"
   },
@@ -269,7 +268,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    opacity: 0.5,
+    opacity: 1,
   }
 });
 

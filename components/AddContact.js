@@ -11,14 +11,16 @@ import {
   TextInput,
   ScrollView,
   TouchableHighlight,
+  Image
 } from 'react-native';
 
 import Config from './config';
 import GiftedSpinner from 'react-native-gifted-spinner';
 const STORAGE_KEY = '@TBP:user';
-import k from './keyboarddismiss';
-import { Actions } from 'react-native-router-flux';
 
+import { Actions } from 'react-native-router-flux';
+import Spinner from './Modal';
+import k from './keyboarddismiss';
 
 var onBack;
 
@@ -46,7 +48,6 @@ class AddContact extends Component {
     var user = await AsyncStorage.getItem(STORAGE_KEY);
     if(user !== null) {
       user = JSON.parse(user);
-
       if(user.userId) {
           this.setState({
             userId: user.userId,
@@ -64,9 +65,51 @@ class AddContact extends Component {
     }
   }
   catch(error){
-      alert("Error in fetch User id  "+ error.message)
+      alert("Some Error Occured. Please Login again."+ error.message);
+      Actions.login({type: 'reset'});
+      Actions.refresh();
     }
   }
+
+  _saveContact() {
+    if (this.state.name && this.state.email && this.state.contact && this.state.area) {
+              this.setState({
+                isLoading: true,
+              })
+              this._fetchUserId().done(() => {
+              this._saveContacttoServer(this.state.name, 
+                  this.state.contact, this.state.email, 
+                  this.state.area).done((response) => {
+                    if (response) {
+                      if (response.Android[0].result == "Success") {
+                        // Success
+                         alert(JSON.stringify(response.Android[0].msg))
+                         Actions.home({type: 'reset'});
+                         Actions.refresh();
+                      } else {
+                          this.setState({
+                            isLoading: false,
+                          })
+                          alert("Some error occured. Please try again");
+                      }
+                    } else {
+                          this.setState({
+                            isLoading: false,
+                          })
+                          alert("Some error occured. Please try again");
+                    }
+                    this.setState({
+                      isLoading: false,
+                    })
+      
+                  })
+             })
+          }
+      else {
+        alert("Please Enter Proper Credentials")
+      }
+  }
+
 
   focusNextField(nextField) {
     this.refs[nextField].focus();
@@ -75,7 +118,12 @@ class AddContact extends Component {
   render() {
     return (
       <View style={styles.container}>
-
+          <View style={[styles.fixed, {flex:1}]}>
+            <Image
+                  source={require('../images/app_bg.png')}
+                  style={{flex: 1 ,width: null,height: null,resizeMode: 'stretch',opacity: 0.2}}/>
+                  <Spinner visible={this.state.isLoading} />
+          </View>
         <View style={{flex: 1, padding: 16}}>
         <ScrollView keyboardShouldPersistTaps={true}>
 
@@ -85,11 +133,12 @@ class AddContact extends Component {
               onChange={(event)=> this.setState({name: event.nativeEvent.text})}
               value={this.state.name}
               autoCapitalize="words"
+              style={styles.input}
               returnKeyType="next"
               onSubmitEditing={() => this.focusNextField('2')}
               />
 
-          <Text>Contact</Text>
+          <Text>Mobile No</Text>
             <TextInput
                 ref="2" 
                 keyboardType="numeric"
@@ -106,7 +155,12 @@ class AddContact extends Component {
             onChange={(event) => this.setState({email: event.nativeEvent.text})}
             value={this.state.email}
             returnKeyType="next"
-            onSubmitEditing={() => this.focusNextField('4')}
+            onSubmitEditing={() => { if(this.validateEmail(this.state.email)) {
+              this.focusNextField('4')
+            } else {
+              alert("Please enter proper email.")
+              }}
+            }
             />
 
           <Text>Area</Text>
@@ -141,43 +195,9 @@ class AddContact extends Component {
     );
   }
 
-_saveContact() {
-    k();
-    if (this.state.name && this.state.email && this.state.contact && this.state.area) {
-              this.setState({
-                isLoading: true,
-              })
-              this._fetchUserId().done(() => {
-              this._saveContacttoServer(this.state.name, 
-                  this.state.contact, this.state.email, 
-                  this.state.area).done((response) => {
-                    if (response) {
-                      if (JSON.parse(response.Android[0].result == "Success")) {
-                        // Success
-                         alert(JSON.stringify(response.Android[0].msg))
-                         Actions.home({type: 'reset'});
-                         Actions.refresh();
-                      } else {
-                        // Error
-                      }
-                    } else {
-                      // Some Error
-                    }
-                    this.setState({
-                      isLoading: false,
-                    })
-      
-                  })
-                  })
-        }
-      else {
-        alert("Please Enter Proper Credentials")
-      }
-  }
-
 validateEmail = (email) => {
       var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        return re.test(email);
+     return re.test(email);
 };
 
 async _saveContacttoServer(name, contact, email, area) {
@@ -217,7 +237,7 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: '#e5e5e5'
     },
-     labelContainer: {
+  labelContainer: {
     flexDirection: 'row',
     marginVertical: 2,
     flex: 1,
@@ -241,6 +261,20 @@ const styles = StyleSheet.create({
       fontWeight: "bold",
       alignSelf: "center"
   },
+  fixed: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 1,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#212121',
+    borderRadius: 2,
+    
+  }
 });
 
 

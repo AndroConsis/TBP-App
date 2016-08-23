@@ -14,17 +14,20 @@ import {
   Platform,
   BackAndroid,
   AsyncStorage,
-  View
+  View,
+  Image,
+  StatusBar
 } from 'react-native';
 
 import Login from './components/Login'; 
 import Registration from './components/Registration';
 import Home from './components/Home';
 import AddContact from './components/AddContact';
-import GiftedSpinner from 'react-native-gifted-spinner';
+import Spinner from './components/Modal';
 
 
 const STORAGE_KEY = "@TBP:user";
+
 
 import {Scene, Router} from 'react-native-router-flux';
 
@@ -35,11 +38,24 @@ class TBP extends Component {
     this.state = {
       isLoading : true,
       foundUserId : false,
+      spinnerLoading: false,
     };
   }
 
   componentDidMount(){
-   AsyncStorage.getItem(STORAGE_KEY).then((response) => {
+    StatusBar.setBackgroundColor('#2A527C', true);
+    setTimeout( () => {
+      this._checkUser();
+    }, 5000);
+    setTimeout( () => {
+      this.setState({
+        spinnerLoading : true 
+      })
+    }, 3000)
+  }
+
+  _checkUser() {
+    AsyncStorage.getItem(STORAGE_KEY).then((response) => {
        
     if(response !== null) {
         
@@ -85,6 +101,7 @@ class TBP extends Component {
 
 _renderHomePage() {
     return(
+
         <Router>
           <Scene key="root">
             <Scene key="login" component={Login} title="Login" hideNavBar={true} initial={true} />
@@ -98,6 +115,7 @@ _renderHomePage() {
 
 _renderLoginPage() {
     return (
+
         <Router>
           <Scene key="root">
             <Scene key="home" component={Home} hideNavBar={false} title="Contacts" initial={true}/>
@@ -113,8 +131,14 @@ _renderLoginPage() {
 
 _renderLoadingView() {
   return (
+
       <View style={{flex:1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-        <GiftedSpinner/>
+          <View style={[styles.fixed, {flex:1}]}>
+            <Image
+                  source={require('./images/bg.png')}
+                  style={{flex: 1 ,width: null,height: null,resizeMode: 'stretch',}}/>
+                  <Spinner visible={this.state.spinnerLoading} />
+          </View>
       </View>
     );
 }
@@ -128,7 +152,15 @@ const styles = StyleSheet.create({
    },
    scrollContentContainer: {
     flex: 1
-   }
+   },
+   fixed: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 1,
+  }
 });
 
 AppRegistry.registerComponent('TBP', () => TBP);
