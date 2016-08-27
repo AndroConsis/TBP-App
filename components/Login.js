@@ -16,17 +16,14 @@ import {
 
 import kd from './keyboarddismiss'
 import Config from './config';
-import GiftedSpinner from 'react-native-gifted-spinner';
+
 import { Actions } from 'react-native-router-flux';
 
 
 const STORAGE_KEY = "@TBP:user";
 
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import Spinner from './Modal';
-
-const myIcon = (<Icon name="ios-arrow-up-outline" size={25} color="#900" />)
-const successIcon = (<Icon name="ios-checkmark-outline" size={25} color="#900" />)
 
 class Login extends Component {
   
@@ -39,6 +36,8 @@ class Login extends Component {
     	signing: "Sign In",
       logged: true,
       loading: false,
+      showEmail: false,
+      validEmail: false,
     };
   }
 
@@ -72,7 +71,14 @@ class Login extends Component {
             <View style={{margin: 16, padding: 8, marginTop: 40}} keyboardShouldPersistTaps={true}>
 
     		    	<View keyboardShouldPersistTaps={true}>
-                  <Text>Email</Text>
+                  <Text>Email{this.state.showEmail 
+                          ? ( this.state.validEmail 
+                            ? 
+                            (<Icon name="check" size={15} color="#2b2b2b"/>) 
+                            : 
+                            (<Icon name="error" size={15} color="#DF6126"/>)
+                          
+                          ) : (<Text></Text>)}</Text>
     		    			<TextInput
     		    				 ref="1"
     		    				 keyboardType={'email-address'}
@@ -80,11 +86,16 @@ class Login extends Component {
     		    				 style={styles.formInput}
                      returnKeyType="next"
                       onSubmitEditing={() => {if (!this.validateEmail(this.state.email)) {
-                                      alert("Please enter a Valid Email Id")
+                                      this.setState({showEmail: true});
                                     } else {
                                   this.focusNextField('2');
                               }}}
-    		    				 onChange={(event) => this.setState({email: event.nativeEvent.text})}
+    		    				 onChange={(event) => {this.setState({email: event.nativeEvent.text})
+                                          if(this.validateEmail(event.nativeEvent.text)){
+                                            this.setState({validEmail : true})
+                                          } else {
+                                            this.setState({validEmail : false})
+                                          }}}
     		    				 >
     		    			</TextInput>
     		    	</View>
@@ -118,9 +129,7 @@ class Login extends Component {
                     onPress={ ()=> this._login()} 
                       style={styles.button}>
                       <View>
-                      {this.state.loading ? 
-                         (<GiftedSpinner/>) :
-                         ( <Text style={styles.buttonText}>{this.state.signing}</Text>)}
+                         <Text style={styles.buttonText}>{this.state.signing}</Text>
                       </View>
                 </TouchableHighlight> 
               </View> 
@@ -171,9 +180,9 @@ class Login extends Component {
 
   _login(){
     kd();
-    if(this.state.email || this.state.password !== '' && this.validateEmail(this.state.email)){
+    if(this.state.validEmail && (this.state.password.toString().length > 5)){
       this.setState({
-        signing: "checking..",
+        signing: "Authenticating..",
         loading: true
       })
     	fetch(Config.api+"/user-login?email="+this.state.email+"&password="+this.state.password)
@@ -181,7 +190,7 @@ class Login extends Component {
     	   .then((responseJson) => {
         if(responseJson.Android[0].result == "Success"){
             this.setState({
-                signing: "Logging in .." + successIcon
+                signing: "Signing in ..",
             })
             this._storeUser(responseJson.Android[0].userid).done(() => {
               Actions.home({type: 'reset'});

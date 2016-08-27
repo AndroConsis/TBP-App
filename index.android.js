@@ -70,7 +70,7 @@ class TBP extends Component {
       this.setState({
         spinnerLoading : true 
       })
-    }, 3000)
+    }, 4000)
   }
 
   _checkUser() {

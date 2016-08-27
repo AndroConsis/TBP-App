@@ -15,14 +15,14 @@ import {
 } from 'react-native';
 
 import Config from './config';
-import GiftedSpinner from 'react-native-gifted-spinner';
 const STORAGE_KEY = '@TBP:user';
-
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Actions } from 'react-native-router-flux';
 import Spinner from './Modal';
 import k from './keyboarddismiss';
+const tick = (<Icon name="check" size={15} color="#2b2b2b"/>)
+const wrong = (<Icon name="eroor" size={15} color="#DF6126"/>)
 
-var onBack;
 
 class AddContact extends Component {
 
@@ -35,51 +35,28 @@ class AddContact extends Component {
       email: '',
       area: '',
       isLoading: false,
+      validContact: false,
+      validEmail: false,
+      validName: false,
+      validAddress: false,
+      showEmail: false,
+      showMobile: false,
+      showName: false,
       userId: '',
     };
   }
 
-  componentDidMount(){
-    
-  }
-
-  async _fetchUserId(){
-    try{
-    var user = await AsyncStorage.getItem(STORAGE_KEY);
-    if(user !== null) {
-      user = JSON.parse(user);
-      if(user.userId) {
-          this.setState({
-            userId: user.userId,
-          })
-      } else {
-        alert("Session Expired! ")
-        Actions.login({type: 'reset'});
-        Actions.refresh();
-      }
-    } else {
-      // Credentials Expired
-      alert("Session Expired! ")
-        Actions.login({type: 'reset'});
-        Actions.refresh();
-    }
-  }
-  catch(error){
-      alert("Some Error Occured. Please Login again."+ error.message);
-      Actions.login({type: 'reset'});
-      Actions.refresh();
-    }
-  }
-
   _saveContact() {
-    if (this.state.name && this.state.email && this.state.contact && this.state.area) {
+    if (this.state.validName && this.state.validEmail && this.state.validContact && this.state.area) {
+              
               this.setState({
                 isLoading: true,
-              })
+              });
               this._fetchUserId().done(() => {
               this._saveContacttoServer(this.state.name, 
                   this.state.contact, this.state.email, 
                   this.state.area).done((response) => {
+                    alert(JSON.stringify(response))
                     if (response) {
                       if (response.Android[0].result == "Success") {
                         // Success
@@ -127,10 +104,32 @@ class AddContact extends Component {
         <View style={{flex: 1, padding: 16}}>
         <ScrollView keyboardShouldPersistTaps={true}>
 
-          <Text>Name</Text>
+          <Text>Name {this.state.showName 
+            ? ( this.state.validName 
+              ? 
+              (<Icon name="check" size={15} color="#2b2b2b"/>) 
+              : 
+              (<Icon name="error" size={15} color="#DF6126"/>)
+            
+            ) : (<Text></Text>)}</Text>
             <TextInput
               ref="1"
-              onChange={(event)=> this.setState({name: event.nativeEvent.text})}
+              onChange={(event)=> {this.setState({
+                                      name: event.nativeEvent.text,
+                                      showName: true });
+               if(event.nativeEvent.text == ''){
+                  this.setState({validName : false})
+              } else {
+                                    if(this.validateName(event.nativeEvent.text)){
+                                      this.setState({
+                                        validName: true,
+                                      })
+                                    } else {
+                                      this.setState({
+                                        validName: false,
+                                      })
+                                    }
+                                    }}}
               value={this.state.name}
               autoCapitalize="words"
               style={styles.input}
@@ -138,21 +137,48 @@ class AddContact extends Component {
               onSubmitEditing={() => this.focusNextField('2')}
               />
 
-          <Text>Mobile No</Text>
+          <Text>Mobile No{
+            this.state.showMobile 
+            ? ( this.state.validContact 
+              ? 
+              (<Icon name="check" size={15} color="#2b2b2b"/>) 
+              : 
+              (<Icon name="error" size={15} color="#DF6126"/>)
+            
+            ) : (<Text></Text>)}</Text>
             <TextInput
                 ref="2" 
                 keyboardType="numeric"
-                onChange={(event) => this.setState({contact: event.nativeEvent.text})}
+                onChange={(event) => {this.setState({contact: event.nativeEvent.text, showMobile: true});
+                                       if(this.validateMobile(event.nativeEvent.text)){
+                                            this.setState({validContact: true})
+                                          } else {
+                                            this.setState({validContact: false})
+                                          }}}
                 value={this.state.contact}
                 returnKeyType="next"
                 onSubmitEditing={() => this.focusNextField('3')}
                 />
         
-          <Text>Email</Text>
+          <Text>Email{
+            this.state.showEmail 
+            ? ( this.state.validEmail 
+              ? 
+              (<Icon name="check" size={15} color="#2b2b2b"/>) 
+              : 
+              (<Icon name="error" size={15} color="#DF6126"/>)
+            
+            ) : (<Text></Text>)}</Text>
           <TextInput 
             ref="3"
             keyboardType="email-address" 
-            onChange={(event) => this.setState({email: event.nativeEvent.text})}
+            onChange={(event) => {this.setState({email: event.nativeEvent.text, showEmail: true})
+                                    if(this.validateEmail(event.nativeEvent.text)){
+                                      this.setState({validEmail: true})
+                                    } else {
+                                      this.setState({validEmail: false})
+                                    }
+                                    }}
             value={this.state.email}
             returnKeyType="next"
             onSubmitEditing={() => { if(this.validateEmail(this.state.email)) {
@@ -171,38 +197,86 @@ class AddContact extends Component {
             returnKeyType="done"
             onSubmitEditing={() => this._saveContact()}
             />
+
           <View style={{height: 10}} />
 
           <TouchableHighlight
             onPress={() => this._saveContact()}
             style = {styles.button}>
-              
               <View>
-
-              {this.state.isLoading ? 
-                (<GiftedSpinner/>) : 
-                (<Text style={styles.buttonText}>Save Contact</Text>)
-              }
-
+                <Text style={styles.buttonText}>Save Contact</Text>
               </View>
-
           </TouchableHighlight>
-
         </ScrollView>
         </View>
-
       </View>
     );
   }
 
-validateEmail = (email) => {
+validateMobile(mob) {
+   if(this._isInt(mob))
+        {
+          if(this._isGreaterThan(mob, 10)){
+              return true;
+          } else {
+              return false;
+          }
+      } else {
+          return false;
+  }
+}
+
+validateEmail(email) {
       var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
      return re.test(email);
 };
 
+validateName(name) {
+      return /^[A-Za-z\s]{1,}[\.]{0,1}[A-Za-z\s]{0,}$/.test(name);
+};
+
+_isInt(x) {
+  return x % 1 === 0;
+}
+
+_isGreaterThan(a, b){
+  if(a.toString().length >= b)
+    return true;
+  else 
+    return false;
+}
+
+async _fetchUserId(){
+    try{
+    var user = await AsyncStorage.getItem(STORAGE_KEY);
+    if(user !== null) {
+      user = JSON.parse(user);
+      if(user.userId) {
+          this.setState({
+            userId: user.userId,
+          })
+      } else {
+        alert("Session Expired! ")
+        Actions.login({type: 'reset'});
+        Actions.refresh();
+      }
+    } else {
+      // Credentials Expired
+      alert("Session Expired! ")
+        Actions.login({type: 'reset'});
+        Actions.refresh();
+    }
+  }
+  catch(error){
+      alert("Some Error Occured. Please Login again."+ error.message);
+      Actions.login({type: 'reset'});
+      Actions.refresh();
+    }
+  }
+
 async _saveContacttoServer(name, contact, email, area) {
   try {
-    let response = await fetch(Config.api + '/save-clients?user_id='
+    let response = await fetch('http://tajbusinessopportunity.com/tbp/save-clients?user_id='
                             +this.state.userId
                             +'&name='+name+'&contact='+contact
                             +'&email='+email+'&area='+area)

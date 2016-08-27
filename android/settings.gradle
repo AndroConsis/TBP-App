@@ -3,4 +3,6 @@ rootProject.name = 'TBP'
 include ':app'
 
 include ':react-native-image-picker'
+include ':reactnativesignaturecapture',':app'
 project(':react-native-image-picker').projectDir = new File(settingsDir, '../node_modules/react-native-image-picker/android')
+project(':reactnativesignaturecapture').projectDir = new File(settingsDir, '../node_modules/react-native-signature-capture/android')

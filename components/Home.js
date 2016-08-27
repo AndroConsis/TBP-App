@@ -11,18 +11,17 @@ import {
   TouchableHighLight,
   ToolbarAndroid,
   AsyncStorage,
-  Image
+  Image,
+  NetInfo
 } from 'react-native';
 
 const STORAGE_KEY = "@TBP:user";
 import Config from './config'
-import GiftedSpinner from 'react-native-gifted-spinner';
 import ActionButton from 'react-native-action-button';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Actions } from 'react-native-router-flux';
-import Modal from './Modal';
 import Spinner from './Modal';
-
+import NoInternet from './NoInternet';
 const addContactIcon =  (<Icon name="ios-person-add-outline" size={35} color="#FFFFFF" />);
 const menuIcon = (<Icon name="md-apps" size={35} color="#FFFFFF"/>);
 const person = (<Icon name="ios-person" size={25} color="#0680cd"/>);
@@ -38,8 +37,21 @@ class Home extends Component {
       isEmpty: false,
       dataSource: new ListView.DataSource({
         rowHasChanged: (row1, row2) => row1 !== row2
-      })
+      }),
+      internetAvailable: true,
     }
+  }
+  
+  componentDidMount() {
+    this._getData();
+  }
+
+  testInternetConnectivity(){
+    var response;
+    NetInfo.isConnected.fetch().then(isConnected => {
+                 response = isConnected; 
+                  });
+    return response;
   }
 
   async _fetchUserId(){
@@ -70,22 +82,25 @@ class Home extends Component {
     }
   }
 
-  componentDidMount() {
-      this._getData()
-    }
 
-    _getData() {
+  // Handling Internet Errors
+  handleErrors(response) {
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response;
+  }
+
+  _getData() {
+   
       this._fetchUserId().done((userId) => {
         this._fetchContacts(userId);
         })
-      }
-
-    async getUserId(){
-
     }
-
-    _fetchContacts(userId) {
-       fetch("http://tajbusinessopportunity.com/tbp/show-clients?user_id="+userId)
+    
+  _fetchContacts(userId) {
+    fetch("http://tajbusinessopportunity.com/tbp/show-clients?user_id="+userId)
+        .then(this.handleErrors)
         .then((response) => response.json())
         .then((responseData) => {
           if(responseData.Android.length !== 0){
@@ -107,7 +122,8 @@ class Home extends Component {
                   isLoading: false,
                 })
           }
-        }).done();
+        })
+        .done();
     }
 
   render() {
@@ -122,7 +138,6 @@ class Home extends Component {
                       source={require('../images/app_bg.png')}
                       style={{flex: 1 ,width: null,height: null,resizeMode: 'stretch', opacity: 0.2}}/>
                 </View>
-
                 <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
                   <Icon name="ios-filing-outline" size={100} color="#5B5B5B"/>
                   <Text>Your Contact List is Empty. Add Now</Text>
@@ -189,7 +204,7 @@ class Home extends Component {
                 source={require('../images/app_bg.png')}
                 style={{flex: 1 ,width: null,height: null,resizeMode: 'stretch',opacity: 0.2}}/>
           </View>
-           <Spinner visible={true} />
+           <Spinner visible={this.state.isLoading} />
       </View>
     )
   }

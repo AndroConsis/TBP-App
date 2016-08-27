@@ -6,14 +6,13 @@
     "start": "node node_modules/react-native/local-cli/cli.js start"
   },
   "dependencies": {
-    "@remobile/react-native-toast": "^1.0.4",
     "react": "15.2.1",
     "react-native": "0.31.0",
     "react-native-action-button": "^1.1.11",
-    "react-native-button": "^1.6.0",
-    "react-native-gifted-spinner": "^0.1.0",
+    "react-native-checkbox": "^1.0.15",
     "react-native-image-picker": "^0.21.5",
     "react-native-router-flux": "^3.35.0",
+    "react-native-signature-capture": "^0.4.1",
     "react-native-vector-icons": "^2.0.3"
   }
 }

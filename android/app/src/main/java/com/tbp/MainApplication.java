@@ -9,6 +9,7 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.imagepicker.ImagePickerPackage;
+import com.rssignaturecapture.RSSignatureCapturePackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +25,7 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
+        new RSSignatureCapturePackage(),
           new MainReactPackage(),
           new ImagePickerPackage() // <-- added this line
       );
