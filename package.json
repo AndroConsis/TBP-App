@@ -10,6 +10,7 @@
     "react-native": "0.31.0",
     "react-native-action-button": "^1.1.11",
     "react-native-checkbox": "^1.0.15",
+    "react-native-fetch-blob": "^0.9.3",
     "react-native-image-picker": "^0.21.5",
     "react-native-router-flux": "^3.35.0",
     "react-native-signature-capture": "^0.4.1",

@@ -1507,8 +1507,8 @@ var _reactNative=require(43 /* react-native */);
 
 var _Login=require(643 /* ./components/Login */);var _Login2=babelHelpers.interopRequireDefault(_Login);
 var _Registration=require(811 /* ./components/Registration */);var _Registration2=babelHelpers.interopRequireDefault(_Registration);
-var _Home=require(817 /* ./components/Home */);var _Home2=babelHelpers.interopRequireDefault(_Home);
-var _AddContact=require(821 /* ./components/AddContact */);var _AddContact2=babelHelpers.interopRequireDefault(_AddContact);
+var _Home=require(839 /* ./components/Home */);var _Home2=babelHelpers.interopRequireDefault(_Home);
+var _AddContact=require(843 /* ./components/AddContact */);var _AddContact2=babelHelpers.interopRequireDefault(_AddContact);
 var _Modal=require(809 /* ./components/Modal */);var _Modal2=babelHelpers.interopRequireDefault(_Modal);
 
 
@@ -1624,7 +1624,7 @@ return(
 _react2.default.createElement(_reactNative.View,{style:{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}},
 _react2.default.createElement(_reactNative.View,{style:[styles.fixed,{flex:1}]},
 _react2.default.createElement(_reactNative.Image,{
-source:require(822 /* ./images/bg.png */),
+source:require(844 /* ./images/bg.png */),
 style:{flex:1,width:null,height:null,resizeMode:'stretch'}}),
 _react2.default.createElement(_Modal2.default,{visible:this.state.spinnerLoading}))));
 
@@ -89487,13 +89487,10 @@ var _Modal=require(809 /* ./Modal */);var _Modal2=babelHelpers.interopRequireDef
 
 
 var _reactNativeSignatureCapture=require(812 /* react-native-signature-capture */);var _reactNativeSignatureCapture2=babelHelpers.interopRequireDefault(_reactNativeSignatureCapture);
-var _checkbox=require(813 /* ./checkbox */);var _checkbox2=babelHelpers.interopRequireDefault(_checkbox);var STORAGE_KEY="@TBP:user";var imageUploadIcon=_react2.default.createElement(_MaterialIcons2.default,{name:'add-a-photo',size:30,color:'#4F4F4F'});var Item=_reactNative.Picker.Item;var ImagePicker=require(815 /* react-native-image-picker */);
+var _checkbox=require(813 /* ./checkbox */);var _checkbox2=babelHelpers.interopRequireDefault(_checkbox);
 
-var _XHR=GLOBAL.originalXMLHttpRequest?
-GLOBAL.originalXMLHttpRequest:
-GLOBAL.XMLHttpRequest;
+var _reactNativeFetchBlob=require(815 /* react-native-fetch-blob */);var _reactNativeFetchBlob2=babelHelpers.interopRequireDefault(_reactNativeFetchBlob);var STORAGE_KEY="@TBP:user";var imageUploadIcon=_react2.default.createElement(_MaterialIcons2.default,{name:'add-a-photo',size:30,color:'#4F4F4F'});var Item=_reactNative.Picker.Item;var ImagePicker=require(837 /* react-native-image-picker */);
 
-XMLHttpRequest=_XHR;
 
 var options={
 title:'Select Image',
@@ -89566,7 +89563,10 @@ noSignatureYet:true,
 validSignature:false,
 showSignature:false,
 showSignatureScreen:false,
-isChecked:false};return _this;
+isChecked:false,
+representative_number:'',
+show_representative_number:false,
+valid_representative_number:false};return _this;
 
 }babelHelpers.createClass(Registration,[{key:'focusNextField',value:function focusNextField(
 
@@ -89708,90 +89708,48 @@ noBackImageYet:false});}
 (0,_keyboarddismiss2.default)();
 if(this.state.validName&&this.state.validEmail&&this.state.validMob&&this.state.validOccupation&&this.state.validPancard&&
 this.state.validIdNo&&this.state.address.length>0&&this.confirmPassword()&&this.state.validImage&&
-this.state.validSignature&&this.state.validBackImage&&this.state.validFrontImage&&this.state.validPancardImage&&this.state.isChecked){
+this.state.validSignature&&this.state.validBackImage&&this.state.validFrontImage&&this.state.validPancardImage&&
+this.state.isChecked&&this.state.valid_representative_number){
 this.setState({
 loading:true});
 
 
-var photo={
-uri:this.state.userImageUrl,
-type:'image/jpg',
-name:this.state.name+".jpg"};
-
-var pancardImage={
-uri:this.state.userPancardUrl,
-type:'image/jpg',
-name:this.state.name+"_pancard.jpg"};
-
-var Front={
-uri:this.state.idFrontImageURL,
-type:'image/jpg',
-name:this.state.name+"_id_front_image.jpg"};
-
-var Back={
-uri:this.state.idBackImageURL,
-type:'image/jpg',
-name:this.state.name+"_id_back_image.jpg"};
-
-var Signature={
-uri:this.state.signatureURL,
-file:'image/jpg',
-name:this.state.name+"_signature.jpg"};
-
-var body=new FormData();
-body.append('image',photo);
-body.append('name',this.state.name);
-body.append('address',this.state.address);
-body.append('mobile_no',this.state.mobile_no);
-body.append('alt_mobile_no',this.state.alt_mobile_no);
-body.append('email',this.state.email);
-body.append('password',this.state.password);
-body.append('pancard_no',this.state.pancard_no);
-body.append('occupation',this.state.occupation);
-body.append('referancename',this.state.referancename);
-body.append('firebaseid',"");
-body.append('pancard_image',pancardImage);
-body.append('id_front_photo',Front);
-body.append('id_back_photo',Back);
-body.append('signature',Signature);
-body.append('id_type',this.state.idType);
-body.append('id_number',this.state.idNumber);
-var xhr=new XMLHttpRequest();
-xhr.open('POST',"http://tajbusinessopportunity.com/tbp/user-register");
-xhr.send(body);
-xhr.onload=function(){
-alert(xhr.responseText);
-if(xhr.status!==200){
-alert("Failed : Some Error Occured Please check your credentials again");
-_this3.setState({
-loading:false});
-
-return;
-};
-if(JSON.parse(xhr.responseText).Android[0].result=="Success"){
+_reactNativeFetchBlob2.default.fetch('POST','http://tajbusinessopportunity.com/tbp/user-register',{
+'Content-Type':'multipart/form-data'},
+[
+{name:'image',filename:this.state.name+"_image.jpg",type:'image/jpg',data:_reactNativeFetchBlob2.default.wrap(this.state.imageUrl)},
+{name:'pancard_image',filename:this.state.name+"_pancard.jpg",type:'image/jpg',data:_reactNativeFetchBlob2.default.wrap(this.state.userPancardUrl)},
+{name:'id_front_photo',filename:this.state.name+"_id_front_photo.jpg",type:'image/jpg',data:_reactNativeFetchBlob2.default.wrap(this.state.idFrontImageURL)},
+{name:'id_back_photo',filename:this.state.name+"_id_back_photo.jpg",type:'image/jpg',data:_reactNativeFetchBlob2.default.wrap(this.state.idBackImageURL)},
+{name:'signature',filename:this.state.name+"_signature.jpg",type:'image/png',data:_reactNativeFetchBlob2.default.wrap(this.state.signatureURL)},
+{name:'name',data:this.state.name},
+{name:'address',data:this.state.address},
+{name:'mobile_no',data:this.state.mobile_no},
+{name:'alt_mobile_no',data:this.state.address},
+{name:'email',data:this.state.email},
+{name:'password',data:this.state.password},
+{name:'pancard_no',data:this.state.pancard_no},
+{name:'occupation',data:this.state.occupation},
+{name:'referancename',data:this.state.referancename},
+{name:'firebaseid',data:""},
+{name:'id_type',data:this.state.idType},
+{name:'id_number',data:this.state.idNumber},
+{name:'representative_number',data:this.state.representative_number}]).
+then(function(resp){
+_this3.setState({loading:false});
+if(JSON.parse(resp).Android[0].result=="Success"){
 alert("Registration Successful please Login with your credentials");
 _reactNativeRouterFlux.Actions.login({type:'reset'});
 _reactNativeRouterFlux.Actions.refresh();
-_this3.setState({
-loading:false});
-
+}else if(JSON.parse(resp).Android[0].result=="Failed"){
+alert("Failed : "+JSON.parse(resp).Android[0].msg);
+}else{
+alert("Some Error Occured Please Try Again.");
 }
-
-if(JSON.parse(xhr.responseText).Android[0].result=="Failed"){
-alert(JSON.parse(xhr.responseText).Android[0].msg);
-_this3.setState({
-loading:false});
-
-}else
-
-{
-alert("Failed: \n"+JSON.parse(xhr.responseText).Android[0].msg);
-_this3.setState({
-loading:false});
-
-}
-
-};
+}).catch(function(err){
+_this3.setState({loading:false});
+alert("Unable to connect to server right now, Please try after some time.");
+});
 
 }else{
 alert("Please fill proper credentials");
@@ -89802,7 +89760,13 @@ showPancard:true,
 showFrontImage:true,
 showBackImage:true,
 showIdNo:true,
-showIdType:true});
+showIdType:true,
+showName:true,
+showEmail:true,
+showMob:true,
+showcp:true,
+showOccption:true,
+show_representative_number:true});
 
 }
 }},{key:'_storeUser',value:function _storeUser(
@@ -89848,7 +89812,7 @@ return(
 _react2.default.createElement(_reactNative.View,{style:styles.container},
 _react2.default.createElement(_reactNative.View,{style:[styles.fixed,{flex:1}]},
 _react2.default.createElement(_reactNative.Image,{
-source:require(816 /* ../images/app_bg.png */),
+source:require(838 /* ../images/app_bg.png */),
 style:{flex:1,width:null,height:null,resizeMode:'stretch'}}),
 _react2.default.createElement(_Modal2.default,{visible:this.state.loading})),
 
@@ -90177,6 +90141,32 @@ style:styles.textInput,
 ref:'10',
 onSubmitEditing:function onSubmitEditing(){return(0,_keyboarddismiss2.default)();}}),
 
+_react2.default.createElement(_reactNative.Text,null,'Representative Mobile No',
+this.state.show_representative_number?
+this.state.valid_representative_number?
+
+_react2.default.createElement(_MaterialIcons2.default,{name:'check',size:15,color:'#2b2b2b'}):
+
+_react2.default.createElement(_MaterialIcons2.default,{name:'error',size:15,color:'#DF6126'}):
+
+_react2.default.createElement(_reactNative.Text,null)),
+
+_react2.default.createElement(_reactNative.TextInput,{
+onChange:function onChange(event){_this4.setState({
+representative_number:event.nativeEvent.text,
+show_representative_number:true});
+
+if(event.nativeEvent.text==''){
+_this4.setState({valid_representative_number:false});
+}else{
+if(_this4.validateMobile(event.nativeEvent.text)){_this4.setState({valid_representative_number:true});}else{_this4.setState({valid_representative_number:false});};
+}},
+value:this.state.representative_number,
+returnKeyType:'next',
+keyboardType:'numeric',
+style:styles.textInput,
+ref:'10',
+onSubmitEditing:function onSubmitEditing(){return(0,_keyboarddismiss2.default)();}}),
 _react2.default.createElement(_reactNative.Text,null,'Reference No'),
 
 _react2.default.createElement(_reactNative.TextInput,{
@@ -90188,7 +90178,7 @@ returnKeyType:'done',
 
 style:styles.textInput,
 ref:'12',
-onSubmitEditing:function onSubmitEditing(){return _this4._submit();}}),
+onSubmitEditing:function onSubmitEditing(){return(0,_keyboarddismiss2.default)();}}),
 
 
 _react2.default.createElement(_reactNative.Text,{style:{alignSelf:'center'}},'Add Your Signature',
@@ -91455,7 +91445,2555 @@ var Ionicons=(0,_createIconSet2.default)(glyphMap,'Ionicons','Ionicons.ttf');
 module.exports=Ionicons;
 module.exports.glyphMap=glyphMap;
 }, "react-native-vector-icons/Ionicons.js");
-__d(815 /* react-native-image-picker/index.js */, function(global, require, module, exports) {'use strict';var _require=
+__d(815 /* react-native-fetch-blob/index.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+
+var _reactNative=require(43 /* react-native */);
+
+
+
+
+
+
+
+
+
+
+
+
+var _StatefulPromise=require(816 /* ./class/StatefulPromise.js */);var _StatefulPromise2=babelHelpers.interopRequireDefault(_StatefulPromise);
+var _fs=require(817 /* ./fs */);var _fs2=babelHelpers.interopRequireDefault(_fs);
+var _uuid=require(822 /* ./utils/uuid */);var _uuid2=babelHelpers.interopRequireDefault(_uuid);
+var _base=require(823 /* base-64 */);var _base2=babelHelpers.interopRequireDefault(_base);
+var _polyfill=require(824 /* ./polyfill */);var _polyfill2=babelHelpers.interopRequireDefault(_polyfill);
+var _android=require(836 /* ./android */);var _android2=babelHelpers.interopRequireDefault(_android);var
+
+RNFetchBlobSession=_fs2.default.RNFetchBlobSession;var
+readStream=_fs2.default.readStream;var
+createFile=_fs2.default.createFile;var
+unlink=_fs2.default.unlink;var
+exists=_fs2.default.exists;var
+mkdir=_fs2.default.mkdir;var
+session=_fs2.default.session;var
+writeStream=_fs2.default.writeStream;var
+readFile=_fs2.default.readFile;var
+ls=_fs2.default.ls;var
+isDir=_fs2.default.isDir;var
+mv=_fs2.default.mv;var
+cp=_fs2.default.cp;
+
+
+
+var Blob=_polyfill2.default.Blob;
+var emitter=_reactNative.DeviceEventEmitter;
+var RNFetchBlob=_reactNative.NativeModules.RNFetchBlob;
+
+
+emitter.addListener("RNFetchBlobMessage",function(e){
+if(e.event==='warn'){
+console.warn(e.detail);
+}else
+if(e.event==='error'){
+throw e.detail;
+}else
+{
+console.log("RNFetchBlob native message",e.detail);
+}
+});
+
+
+if(!RNFetchBlob||!RNFetchBlob.fetchBlobForm||!RNFetchBlob.fetchBlob){
+console.warn(
+'react-native-fetch-blob could not find valid native module.',
+'please make sure you have linked native modules using `rnpm link`,',
+'and restart RN packager or manually compile IOS/Android project.');
+
+}
+
+function wrap(path){
+return'RNFetchBlob-file://'+path;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function config(options){
+return{fetch:fetch.bind(options)};
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+function fetch(){for(var _len=arguments.length,args=Array(_len),_key=0;_key<_len;_key++){args[_key]=arguments[_key];}
+
+
+var taskId=(0,_uuid2.default)();
+var options=this||{};
+var subscription=void 0,subscriptionUpload=void 0,stateEvent=void 0;
+var respInfo={};
+
+var promise=new Promise(function(resolve,reject){var _ref=[].concat(babelHelpers.toConsumableArray(
+args));var method=_ref[0];var url=_ref[1];var headers=_ref[2];var body=_ref[3];
+var nativeMethodName=Array.isArray(body)?'fetchBlobForm':'fetchBlob';
+
+
+subscription=emitter.addListener('RNFetchBlobProgress',function(e){
+if(e.taskId===taskId&&promise.onProgress){
+promise.onProgress(e.written,e.total);
+}
+});
+
+subscriptionUpload=emitter.addListener('RNFetchBlobProgress-upload',function(e){
+if(e.taskId===taskId&&promise.onUploadProgress){
+promise.onUploadProgress(e.written,e.total);
+}
+});
+
+stateEvent=emitter.addListener('RNFetchBlobState',function(e){
+respInfo=e;
+if(e.taskId===taskId&&promise.onStateChange){
+promise.onStateChange(e);
+}
+});
+
+
+
+if(body instanceof Blob&&body.isRNFetchBlobPolyfill){
+body=body.getRNFetchBlobRef();
+}
+
+var req=RNFetchBlob[nativeMethodName];
+
+
+
+
+
+
+
+
+
+
+
+
+req(options,taskId,method,url,headers||{},body,function(err,rawType,data){
+
+
+subscription.remove();
+subscriptionUpload.remove();
+stateEvent.remove();
+delete promise['progress'];
+delete promise['uploadProgress'];
+delete promise['stateChange'];
+delete promise['cancel'];
+promise.cancel=function(){
+console.warn('finished request could not be canceled');
+};
+
+if(err)
+reject(new Error(err,respInfo));else
+{
+
+if(options.path||options.fileCache||options.addAndroidDownloads||
+options.key||options.auto&&respInfo.respType==='blob'){
+if(options.session)
+session(options.session).add(data);
+}
+respInfo.rnfbEncode=rawType;
+resolve(new FetchBlobResponse(taskId,respInfo,data));
+}
+
+});
+
+});
+
+
+
+promise.progress=function(fn){
+promise.onProgress=fn;
+RNFetchBlob.enableProgressReport(taskId);
+return promise;
+};
+promise.uploadProgress=function(fn){
+promise.onUploadProgress=fn;
+RNFetchBlob.enableUploadProgressReport(taskId);
+return promise;
+};
+promise.stateChange=function(fn){
+promise.onStateChange=fn;
+return promise;
+};
+promise.cancel=function(fn){
+fn=fn||function(){};
+subscription.remove();
+subscriptionUpload.remove();
+stateEvent.remove();
+RNFetchBlob.cancelRequest(taskId,fn);
+};
+promise.taskId=taskId;
+
+return promise;
+
+}var
+
+
+
+
+FetchBlobResponse=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function FetchBlobResponse(taskId,info,data){var _this=this;babelHelpers.classCallCheck(this,FetchBlobResponse);
+this.data=data;
+this.taskId=taskId;
+this.type=info.rnfbEncode;
+this.respInfo=info;
+
+this.info=function(){
+return _this.respInfo;
+};
+
+
+
+
+this.blob=function(){
+var Blob=_polyfill2.default.Blob;
+var cType=info.headers['Content-Type']||info.headers['content-type'];
+return new Promise(function(resolve,reject){
+switch(_this.type){
+case'base64':
+Blob.build(_this.data,{type:cType+';BASE64'}).then(resolve);
+break;
+case'path':
+_polyfill2.default.Blob.build(wrap(_this.data),{type:cType}).then(resolve);
+break;
+default:
+_polyfill2.default.Blob.build(_this.data,{type:'text/plain'}).then(resolve);
+break;}
+
+});
+};
+
+
+
+
+this.text=function(){
+var res=_this.data;
+switch(_this.type){
+case'base64':
+return _base2.default.decode(_this.data);
+break;
+case'path':
+return _fs2.default.readFile(_this.data,'base64').then(function(b64){return Promise.resolve(_base2.default.decode(b64));});
+break;
+default:
+return _this.data;
+break;}
+
+};
+
+
+
+
+this.json=function(){
+switch(_this.type){
+case'base64':
+return JSON.parse(_base2.default.decode(_this.data));
+break;
+case'path':
+return _fs2.default.readFile(_this.data,'utf8').
+then(function(text){return Promise.resolve(JSON.parse(text));});
+break;
+default:
+return JSON.parse(_this.data);
+break;}
+
+};
+
+
+
+
+this.base64=function(){
+switch(_this.type){
+case'base64':
+return _this.data;
+break;
+case'path':
+return _fs2.default.readFile(_this.data,'base64');
+break;
+default:
+return _base2.default.encode(_this.data);
+break;}
+
+};
+
+
+
+
+this.flush=function(){
+var path=_this.path();
+if(!path||_this.type!=='path')
+return;
+return unlink(path);
+};
+
+
+
+
+this.path=function(){
+if(_this.type==='path')
+return _this.data;
+return null;
+};
+
+this.session=function(name){
+if(_this.type==='path')
+return session(name).add(_this.data);else
+{
+console.warn('only file paths can be add into session.');
+return null;
+}
+};
+
+
+
+
+
+
+this.readStream=function(encode){
+if(_this.type==='path'){
+return readStream(_this.data,encode);
+}else
+{
+console.warn('RNFetchblob','this response data does not contains any available stream');
+return null;
+}
+};
+
+
+
+
+
+
+this.readFile=function(encode){
+if(_this.type==='path'){
+encode=encode||'utf8';
+
+return readFile(_this.data,encode);
+}else
+{
+console.warn('RNFetchblob','this response does not contains a readable file');
+return null;
+}
+};
+};exports.default=
+
+
+
+{
+fetch:fetch,
+base64:_base2.default,
+android:_android2.default,
+config:config,
+session:session,
+fs:_fs2.default,
+wrap:wrap,
+polyfill:_polyfill2.default};
+}, "react-native-fetch-blob/index.js");
+__d(816 /* react-native-fetch-blob/class/StatefulPromise.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var
+
+
+
+
+StatefulPromise=function(_Promise){babelHelpers.inherits(StatefulPromise,_Promise);function StatefulPromise(){babelHelpers.classCallCheck(this,StatefulPromise);return babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(StatefulPromise).apply(this,arguments));}return StatefulPromise;}(Promise);exports.default=StatefulPromise;
+}, "react-native-fetch-blob/class/StatefulPromise.js");
+__d(817 /* react-native-fetch-blob/fs.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+
+var _reactNative=require(43 /* react-native */);
+
+
+
+
+
+var _RNFetchBlobSession=require(818 /* ./class/RNFetchBlobSession */);var _RNFetchBlobSession2=babelHelpers.interopRequireDefault(_RNFetchBlobSession);
+var _RNFetchBlobWriteStream=require(819 /* ./class/RNFetchBlobWriteStream */);var _RNFetchBlobWriteStream2=babelHelpers.interopRequireDefault(_RNFetchBlobWriteStream);
+var _RNFetchBlobReadStream=require(820 /* ./class/RNFetchBlobReadStream */);var _RNFetchBlobReadStream2=babelHelpers.interopRequireDefault(_RNFetchBlobReadStream);
+var _RNFetchBlobFile=require(821 /* ./class/RNFetchBlobFile */);var _RNFetchBlobFile2=babelHelpers.interopRequireDefault(_RNFetchBlobFile);
+
+
+
+
+
+
+var RNFetchBlob=_reactNative.NativeModules.RNFetchBlob;
+var emitter=_reactNative.DeviceEventEmitter;
+var dirs={
+DocumentDir:RNFetchBlob.DocumentDir,
+CacheDir:RNFetchBlob.CacheDir,
+PictureDir:RNFetchBlob.PictureDir,
+MusicDir:RNFetchBlob.MusicDir,
+MovieDir:RNFetchBlob.MovieDir,
+DownloadDir:RNFetchBlob.DownloadDir,
+DCIMDir:RNFetchBlob.DCIMDir};
+
+
+
+
+
+
+
+function session(name){
+var s=_RNFetchBlobSession2.default.getSession(name);
+if(s)
+return new _RNFetchBlobSession2.default(name);else
+{
+_RNFetchBlobSession2.default.setSession(name,[]);
+return new _RNFetchBlobSession2.default(name,[]);
+}
+}
+
+function asset(path){
+if(_reactNative.Platform.OS==='ios'){
+
+if(/^assets-library\:\/\//.test(path))
+return path;
+}
+return'bundle-assets://'+path;
+}
+
+function createFile(path,data,encoding){
+encoding=encoding||'utf8';
+return new Promise(function(resolve,reject){
+var handler=function handler(err){
+if(err)
+reject(err);else
+
+resolve();
+};
+if(encoding.toLowerCase()==='ascii'){
+if(Array.isArray(data))
+RNFetchBlob.createFileASCII(path,data,handler);else
+
+reject('`data` of ASCII file must be an array contains numbers');
+}else
+{
+RNFetchBlob.createFile(path,data,encoding,handler);
+}
+});
+}
+
+
+
+
+
+
+
+
+function writeStream(
+path,
+encoding,
+append)
+{
+if(!path)
+throw Error('RNFetchBlob could not open file stream with empty `path`');
+encoding=encoding||'utf8';
+append=append||false;
+return new Promise(function(resolve,reject){
+RNFetchBlob.writeStream(path,encoding||'base64',append||false,function(err,streamId){
+if(err)
+reject(err);else
+
+resolve(new _RNFetchBlobWriteStream2.default(streamId,encoding));
+});
+});
+}
+
+
+
+
+
+
+
+
+function readStream(
+path,
+encoding,
+bufferSize)
+{
+return Promise.resolve(new _RNFetchBlobReadStream2.default(path,encoding,bufferSize));
+}
+
+
+
+
+
+
+function mkdir(path){
+
+return new Promise(function(resolve,reject){
+RNFetchBlob.mkdir(path,function(err,res){
+if(err)
+reject(err);else
+
+resolve();
+});
+});
+
+}
+
+
+
+
+
+
+
+function readFile(path,encoding,bufferSize){
+if(typeof path!=='string')
+return Promise.reject('Invalid argument "path" ');
+return RNFetchBlob.readFile(path,encoding);
+}
+
+
+
+
+
+
+
+
+function writeFile(path,data,encoding){
+encoding=encoding||'utf8';
+if(typeof path!=='string')
+return Promise.reject('Invalid argument "path" ');
+if(encoding.toLocaleLowerCase()==='ascii'){
+if(!Array.isArray(data))
+Promise.reject('Expected "data" is an Array when encoding is "ascii", however got '+typeof data);else
+
+return RNFetchBlob.writeFileArray(path,data,false);
+}else{
+if(typeof data!=='string')
+Promise.reject('Expected "data" is a String when encoding is "utf8" or "base64", however got '+typeof data);else
+
+return RNFetchBlob.writeFile(path,encoding,data,false);
+}
+}
+
+function appendFile(path,data,encoding){
+encoding=encoding||'utf8';
+if(typeof path!=='string')
+return Promise.reject('Invalid argument "path" ');
+if(encoding.toLocaleLowerCase()==='ascii'){
+if(!Array.isArray(data))
+Promise.reject('Expected "data" is an Array when encoding is "ascii", however got '+typeof data);else
+
+return RNFetchBlob.writeFileArray(path,data,true);
+}else{
+if(typeof data!=='string')
+Promise.reject('Expected "data" is a String when encoding is "utf8" or "base64", however got '+typeof data);else
+
+return RNFetchBlob.writeFile(path,encoding,data,true);
+}
+}
+
+
+
+
+
+
+function stat(path){
+return new Promise(function(resolve,reject){
+RNFetchBlob.stat(path,function(err,stat){
+if(err)
+reject(err);else
+
+resolve(stat);
+});
+});
+}
+
+
+
+
+
+
+function scanFile(pairs){
+return new Promise(function(resolve,reject){
+RNFetchBlob.scanFile(pairs,function(err){
+if(err)
+reject(err);else
+
+resolve();
+});
+});
+}
+
+function cp(path,dest){
+return new Promise(function(resolve,reject){
+RNFetchBlob.cp(path,dest,function(err,res){
+if(err)
+reject(err);else
+
+resolve(res);
+});
+});
+}
+
+function mv(path,dest){
+return new Promise(function(resolve,reject){
+RNFetchBlob.mv(path,dest,function(err,res){
+if(err)
+reject(err);else
+
+resolve(res);
+});
+});
+}
+
+function lstat(path){
+return new Promise(function(resolve,reject){
+RNFetchBlob.lstat(path,function(err,stat){
+if(err)
+reject(err);else
+
+resolve(stat);
+});
+});
+}
+
+function ls(path){
+return new Promise(function(resolve,reject){
+RNFetchBlob.ls(path,function(err,res){
+if(err)
+reject(err);else
+
+resolve(res);
+});
+});
+}
+
+
+
+
+
+
+function unlink(path){
+return new Promise(function(resolve,reject){
+RNFetchBlob.unlink(path,function(err){
+if(err)
+reject(err);else
+
+resolve();
+});
+});
+}
+
+
+
+
+
+
+function exists(path){
+
+return new Promise(function(resolve,reject){
+try{
+RNFetchBlob.exists(path,function(exist){
+resolve(exist);
+});
+}catch(err){
+reject(err);
+}
+});
+
+}
+
+function slice(src,dest,start,end){
+var p=Promise.resolve();
+var size=0;
+function normalize(num,size){
+if(num<0)
+return Math.max(0,size+num);
+if(!num&&num!==0)
+return size;
+return num;
+}
+if(start<0||end<0||!start||!end){
+p=p.then(function(){return stat(src);}).
+then(function(stat){
+size=Math.floor(stat.size);
+start=normalize(start||0,size);
+end=normalize(end,size);
+return Promise.resolve();
+});
+}
+return p.then(function(){return RNFetchBlob.slice(src,dest,start,end);});
+}
+
+function isDir(path){
+
+return new Promise(function(resolve,reject){
+try{
+RNFetchBlob.exists(path,function(exist,isDir){
+resolve(isDir);
+});
+}catch(err){
+reject(err);
+}
+});
+
+}exports.default=
+
+{
+RNFetchBlobSession:_RNFetchBlobSession2.default,
+unlink:unlink,
+mkdir:mkdir,
+session:session,
+ls:ls,
+readStream:readStream,
+mv:mv,
+cp:cp,
+writeStream:writeStream,
+writeFile:writeFile,
+appendFile:appendFile,
+readFile:readFile,
+exists:exists,
+createFile:createFile,
+isDir:isDir,
+stat:stat,
+lstat:lstat,
+scanFile:scanFile,
+dirs:dirs,
+slice:slice,
+asset:asset};
+}, "react-native-fetch-blob/fs.js");
+__d(818 /* react-native-fetch-blob/class/RNFetchBlobSession.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+
+var _reactNative=require(43 /* react-native */);
+
+
+
+
+
+var RNFetchBlob=_reactNative.NativeModules.RNFetchBlob;
+var emitter=_reactNative.DeviceEventEmitter;
+
+var sessions={};var
+
+RNFetchBlobSession=function(){babelHelpers.createClass(RNFetchBlobSession,null,[{key:'getSession',value:function getSession(
+
+
+
+
+
+
+
+name){
+return sessions[name];
+}},{key:'setSession',value:function setSession(
+
+name,val){
+sessions[name]=val;
+}},{key:'removeSession',value:function removeSession(
+
+name){
+delete sessions[name];
+}}]);
+
+function RNFetchBlobSession(name,list){babelHelpers.classCallCheck(this,RNFetchBlobSession);
+this.name=name;
+if(!sessions[name]){
+if(Array.isArray(list))
+sessions[name]=list;else
+
+sessions[name]=[];
+}
+}babelHelpers.createClass(RNFetchBlobSession,[{key:'add',value:function add(
+
+path){
+sessions[this.name].push(path);
+return this;
+}},{key:'remove',value:function remove(
+
+path){
+var list=sessions[this.name];
+for(var i in list){
+if(list[i]===path){
+sessions[this.name].splice(i,1);
+break;
+}
+}
+return this;
+}},{key:'list',value:function list()
+
+{
+return sessions[this.name];
+}},{key:'dispose',value:function dispose()
+
+{var _this=this;
+return new Promise(function(resolve,reject){
+RNFetchBlob.removeSession(sessions[_this.name],function(err){
+if(err)
+reject(err);else
+{
+delete sessions[_this.name];
+resolve();
+}
+});
+});
+}}]);return RNFetchBlobSession;}();exports.default=RNFetchBlobSession;
+}, "react-native-fetch-blob/class/RNFetchBlobSession.js");
+__d(819 /* react-native-fetch-blob/class/RNFetchBlobWriteStream.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+
+var _reactNative=require(43 /* react-native */);
+
+
+
+
+
+var RNFetchBlob=_reactNative.NativeModules.RNFetchBlob;
+var emitter=_reactNative.DeviceEventEmitter;var
+
+RNFetchBlobWriteStream=function(){
+
+
+
+
+
+function RNFetchBlobWriteStream(streamId,encoding,append){babelHelpers.classCallCheck(this,RNFetchBlobWriteStream);
+this.id=streamId;
+this.encoding=encoding;
+this.append=append;
+}babelHelpers.createClass(RNFetchBlobWriteStream,[{key:'write',value:function write(
+
+data){var _this=this;
+return new Promise(function(resolve,reject){
+try{
+var method=_this.encoding==='ascii'?'writeArrayChunk':'writeChunk';
+if(_this.encoding.toLocaleLowerCase()==='ascii'&&!Array.isArray(data)){
+reject('ascii input data must be an Array');
+return;
+}
+RNFetchBlob[method](_this.id,data,function(error){
+if(error)
+reject(error);else
+
+resolve();
+});
+}catch(err){
+reject(err);
+}
+});
+}},{key:'close',value:function close()
+
+{var _this2=this;
+return new Promise(function(resolve,reject){
+try{
+RNFetchBlob.closeStream(_this2.id,function(){
+resolve();
+});
+}catch(err){
+reject(err);
+}
+});
+}}]);return RNFetchBlobWriteStream;}();exports.default=RNFetchBlobWriteStream;
+}, "react-native-fetch-blob/class/RNFetchBlobWriteStream.js");
+__d(820 /* react-native-fetch-blob/class/RNFetchBlobReadStream.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+
+var _reactNative=require(43 /* react-native */);
+
+
+
+
+
+var RNFetchBlob=_reactNative.NativeModules.RNFetchBlob;
+var emitter=_reactNative.DeviceEventEmitter;var
+
+RNFetchBlobReadStream=function(){
+
+
+
+
+
+
+function RNFetchBlobReadStream(path,encoding,bufferSize){var _this=this;babelHelpers.classCallCheck(this,RNFetchBlobReadStream);
+if(!path)
+throw Error('RNFetchBlob could not open file stream with empty `path`');
+this.encoding=encoding||'utf8';
+this.bufferSize=bufferSize;
+this.path=path;
+this.closed=false;
+this._onData=function(){};
+this._onEnd=function(){};
+this._onError=function(){};
+
+
+var subscription=emitter.addListener('RNFetchBlobStream+'+this.path,function(e){var
+
+event=e.event;var detail=e.detail;
+if(_this._onData&&event==='data')
+_this._onData(detail);else
+if(_this._onEnd&&event==='end'){
+_this._onEnd(detail);
+}else
+{
+if(_this._onError)
+_this._onError(detail);else
+
+throw new Error(detail);
+}
+
+if(event==='error'||event==='end'){
+subscription.remove();
+_this.closed=true;
+}
+});
+
+}babelHelpers.createClass(RNFetchBlobReadStream,[{key:'open',value:function open()
+
+{
+if(!this.closed)
+RNFetchBlob.readStream(this.path,this.encoding,this.bufferSize||0);else
+
+throw new Error('Stream closed');
+}},{key:'onData',value:function onData(
+
+fn){
+if(this.encoding.toLowerCase()==='ascii')
+this._onData=function(data){
+fn(data);
+};else
+
+this._onData=fn;
+}},{key:'onError',value:function onError(
+
+fn){
+this._onError=fn;
+}},{key:'onEnd',value:function onEnd(
+
+fn){
+this._onEnd=fn;
+}}]);return RNFetchBlobReadStream;}();exports.default=RNFetchBlobReadStream;
+}, "react-native-fetch-blob/class/RNFetchBlobReadStream.js");
+__d(821 /* react-native-fetch-blob/class/RNFetchBlobFile.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+
+
+var _reactNative=require(43 /* react-native */);
+
+
+
+
+
+var RNFetchBlob=_reactNative.NativeModules.RNFetchBlob;
+var emitter=_reactNative.DeviceEventEmitter;var
+
+RNFetchBlobFile=function RNFetchBlobFile(){babelHelpers.classCallCheck(this,RNFetchBlobFile);};exports.default=RNFetchBlobFile;
+}, "react-native-fetch-blob/class/RNFetchBlobFile.js");
+__d(822 /* react-native-fetch-blob/utils/uuid.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});exports.default=getUUID;function getUUID(){
+return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){
+var r=Math.random()*16|0,v=c=='x'?r:r&0x3|0x8;
+return v.toString(16);
+});
+}
+}, "react-native-fetch-blob/utils/uuid.js");
+__d(823 /* base-64/base64.js */, function(global, require, module, exports) {
+;(function(root){
+
+
+var freeExports=typeof exports=='object'&&exports;
+
+
+var freeModule=typeof module=='object'&&module&&
+module.exports==freeExports&&module;
+
+
+
+var freeGlobal=typeof global=='object'&&global;
+if(freeGlobal.global===freeGlobal||freeGlobal.window===freeGlobal){
+root=freeGlobal;
+}
+
+
+
+var InvalidCharacterError=function InvalidCharacterError(message){
+this.message=message;
+};
+InvalidCharacterError.prototype=new Error();
+InvalidCharacterError.prototype.name='InvalidCharacterError';
+
+var error=function error(message){
+
+
+throw new InvalidCharacterError(message);
+};
+
+var TABLE='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+var REGEX_SPACE_CHARACTERS=/[\t\n\f\r ]/g;
+
+
+
+
+
+var decode=function decode(input){
+input=String(input).
+replace(REGEX_SPACE_CHARACTERS,'');
+var length=input.length;
+if(length%4==0){
+input=input.replace(/==?$/,'');
+length=input.length;
+}
+if(
+length%4==1||
+
+/[^+a-zA-Z0-9/]/.test(input))
+{
+error(
+'Invalid character: the string to be decoded is not correctly encoded.');
+
+}
+var bitCounter=0;
+var bitStorage;
+var buffer;
+var output='';
+var position=-1;
+while(++position<length){
+buffer=TABLE.indexOf(input.charAt(position));
+bitStorage=bitCounter%4?bitStorage*64+buffer:buffer;
+
+if(bitCounter++%4){
+
+output+=String.fromCharCode(
+0xFF&bitStorage>>(-2*bitCounter&6));
+
+}
+}
+return output;
+};
+
+
+
+var encode=function encode(input){
+input=String(input);
+if(/[^\0-\xFF]/.test(input)){
+
+
+error(
+'The string to be encoded contains characters outside of the '+
+'Latin1 range.');
+
+}
+var padding=input.length%3;
+var output='';
+var position=-1;
+var a;
+var b;
+var c;
+var d;
+var buffer;
+
+var length=input.length-padding;
+
+while(++position<length){
+
+a=input.charCodeAt(position)<<16;
+b=input.charCodeAt(++position)<<8;
+c=input.charCodeAt(++position);
+buffer=a+b+c;
+
+
+output+=
+TABLE.charAt(buffer>>18&0x3F)+
+TABLE.charAt(buffer>>12&0x3F)+
+TABLE.charAt(buffer>>6&0x3F)+
+TABLE.charAt(buffer&0x3F);
+
+}
+
+if(padding==2){
+a=input.charCodeAt(position)<<8;
+b=input.charCodeAt(++position);
+buffer=a+b;
+output+=
+TABLE.charAt(buffer>>10)+
+TABLE.charAt(buffer>>4&0x3F)+
+TABLE.charAt(buffer<<2&0x3F)+
+'=';
+
+}else if(padding==1){
+buffer=input.charCodeAt(position);
+output+=
+TABLE.charAt(buffer>>2)+
+TABLE.charAt(buffer<<4&0x3F)+
+'==';
+
+}
+
+return output;
+};
+
+var base64={
+'encode':encode,
+'decode':decode,
+'version':'0.1.0'};
+
+
+
+
+if(
+typeof define=='function'&&
+typeof define.amd=='object'&&
+define.amd)
+{
+define(function(){
+return base64;
+});
+}else if(freeExports&&!freeExports.nodeType){
+if(freeModule){
+freeModule.exports=base64;
+}else{
+for(var key in base64){
+base64.hasOwnProperty(key)&&(freeExports[key]=base64[key]);
+}
+}
+}else{
+root.base64=base64;
+}
+
+})(this);
+}, "base-64/base64.js");
+__d(824 /* react-native-fetch-blob/polyfill/index.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var _Blob=require(825 /* ./Blob.js */);var _Blob2=babelHelpers.interopRequireDefault(_Blob);
+var _File=require(828 /* ./File.js */);var _File2=babelHelpers.interopRequireDefault(_File);
+var _XMLHttpRequest=require(829 /* ./XMLHttpRequest.js */);var _XMLHttpRequest2=babelHelpers.interopRequireDefault(_XMLHttpRequest);
+var _ProgressEvent=require(831 /* ./ProgressEvent */);var _ProgressEvent2=babelHelpers.interopRequireDefault(_ProgressEvent);
+var _Event=require(832 /* ./Event */);var _Event2=babelHelpers.interopRequireDefault(_Event);
+var _FileReader=require(833 /* ./FileReader */);var _FileReader2=babelHelpers.interopRequireDefault(_FileReader);
+var _Fetch=require(834 /* ./Fetch */);var _Fetch2=babelHelpers.interopRequireDefault(_Fetch);exports.default=
+
+{
+Blob:_Blob2.default,File:_File2.default,XMLHttpRequest:_XMLHttpRequest2.default,ProgressEvent:_ProgressEvent2.default,Event:_Event2.default,FileReader:_FileReader2.default,Fetch:_Fetch2.default};
+}, "react-native-fetch-blob/polyfill/index.js");
+__d(825 /* react-native-fetch-blob/polyfill/Blob.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+var _index=require(815 /* ../index.js */);var _index2=babelHelpers.interopRequireDefault(_index);
+var _fs=require(817 /* ../fs.js */);var _fs2=babelHelpers.interopRequireDefault(_fs);
+var _uuid=require(822 /* ../utils/uuid */);var _uuid2=babelHelpers.interopRequireDefault(_uuid);
+var _log=require(826 /* ../utils/log.js */);var _log2=babelHelpers.interopRequireDefault(_log);
+var _EventTarget2=require(827 /* ./EventTarget */);var _EventTarget3=babelHelpers.interopRequireDefault(_EventTarget2);
+
+var log=new _log2.default('Blob');
+var blobCacheDir=_fs2.default.dirs.DocumentDir+'/RNFetchBlob-blobs/';
+
+log.disable();var
+
+
+
+
+
+
+Blob=function(_EventTarget){babelHelpers.inherits(Blob,_EventTarget);babelHelpers.createClass(Blob,[{key:'blobPath',get:function get()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+return this._ref;
+}}],[{key:'clearCache',value:function clearCache(){return _fs2.default.unlink(blobCacheDir).then(function(){return _fs2.default.mkdir(blobCacheDir);});}},{key:'build',value:function build(data,cType){return new Promise(function(resolve,reject){new Blob(data,cType).onCreated(resolve);});}}]);
+
+
+
+
+
+
+
+
+
+
+function Blob(data,cType){babelHelpers.classCallCheck(this,Blob);var _this=babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(Blob).call(this));_this.isRNFetchBlobPolyfill=true;_this.multipartBoundary=null;_this._ref=null;_this._blobCreated=false;_this._onCreated=[];_this._closed=false;
+
+cType=cType||{};
+_this.cacheName=getBlobName();
+_this.isRNFetchBlobPolyfill=true;
+_this.type=cType.type||'text/plain';
+log.verbose('Blob constructor called','mime',_this.type,'type',typeof data,'length',data?data.length:0);
+_this._ref=blobCacheDir+_this.cacheName;
+var p=null;
+if(!data)
+data='';
+if(data.isRNFetchBlobPolyfill){(function(){
+log.verbose('create Blob cache file from Blob object');
+var size=0;
+_this._ref=String(data.getRNFetchBlobRef());
+var orgPath=_this._ref;
+p=_fs2.default.exists(orgPath).
+then(function(exist){
+if(exist)
+return _fs2.default.writeFile(orgPath,data,'uri').
+then(function(size){return Promise.resolve(size);}).
+catch(function(err){
+throw'RNFetchBlob Blob file creation error, '+err;
+});else
+
+throw'could not create Blob from path '+orgPath+', file not exists';
+});})();
+}else
+
+if(data instanceof FormData){
+log.verbose('create Blob cache file from FormData',data);
+var boundary='RNFetchBlob-'+_this.cacheName+'-'+Date.now();
+_this.multipartBoundary=boundary;
+var parts=data.getParts();
+var formArray=[];
+if(!parts){
+p=_fs2.default.writeFile(_this._ref,'','utf8');
+}else
+{
+for(var i in parts){
+formArray.push('\r\n--'+boundary+'\r\n');
+var part=parts[i];
+for(var j in part.headers){
+formArray.push(j+': '+part.headers[j]+';\r\n');
+}
+formArray.push('\r\n');
+if(part.isRNFetchBlobPolyfill)
+formArray.push(part);else
+
+formArray.push(part.string);
+}
+log.verbose('FormData array',formArray);
+formArray.push('\r\n--'+boundary+'--\r\n');
+p=createMixedBlobData(_this._ref,formArray);
+}
+}else
+
+
+if(typeof data==='string'&&data.startsWith('RNFetchBlob-file://')){
+log.verbose('create Blob cache file from file path',data);
+_this._ref=String(data).replace('RNFetchBlob-file://','');
+var _orgPath=_this._ref;
+p=_fs2.default.stat(_orgPath).
+then(function(stat){
+return Promise.resolve(stat.size);
+});
+}else
+
+if(typeof data==='string'){
+var encoding='utf8';
+var mime=String(_this.type);
+
+
+if(/(application\/octet|\;base64)/i.test(mime))
+encoding='base64';else
+
+data=data.toString();
+
+_this.type=String(_this.type).replace(/;base64/ig,'');
+log.verbose('create Blob cache file from string','encode',encoding);
+p=_fs2.default.writeFile(_this._ref,data,encoding).
+then(function(size){
+return Promise.resolve(size);
+});
+
+}else
+
+
+
+
+
+if(Array.isArray(data)){
+log.verbose('create Blob cache file from mixed array',data);
+p=createMixedBlobData(_this._ref,data);
+}else
+{
+data=data.toString();
+p=_fs2.default.writeFile(_this._ref,data,'utf8').
+then(function(size){return Promise.resolve(size);});
+}
+p&&p.then(function(size){
+_this.size=size;
+_this._invokeOnCreateEvent();
+}).
+catch(function(err){
+log.error('RNFetchBlob could not create Blob : '+_this._ref,err);
+});return _this;
+
+}babelHelpers.createClass(Blob,[{key:'onCreated',value:function onCreated(
+
+
+
+
+
+
+
+
+fn){
+log.verbose('#register blob onCreated',this._blobCreated);
+if(!this._blobCreated)
+this._onCreated.push(fn);else
+{
+fn(this);
+}
+return this;
+}},{key:'markAsDerived',value:function markAsDerived()
+
+{
+this._isDerived=true;
+}},{key:'getRNFetchBlobRef',value:function getRNFetchBlobRef()
+
+
+
+
+
+
+
+
+
+
+{
+return this._ref;
+}},{key:'slice',value:function slice(
+
+
+
+
+
+
+
+
+start,end){var contentType=arguments.length<=2||arguments[2]===undefined?'':arguments[2];
+if(this._closed)
+throw'Blob has been released.';
+log.verbose('slice called',start,end,contentType);
+var resPath=blobCacheDir+getBlobName();
+var pass=false;
+log.debug('fs.slice new blob will at',resPath);
+var result=new Blob(_index2.default.wrap(resPath),{type:contentType});
+_fs2.default.slice(this._ref,resPath,start,end).then(function(dest){
+log.debug('fs.slice done',dest);
+result._invokeOnCreateEvent();
+pass=true;
+}).
+catch(function(err){
+pass=true;
+});
+log.debug('slice returning new Blob');
+
+return result;
+}},{key:'readBlob',value:function readBlob(
+
+
+
+
+
+
+
+encoding){
+if(this._closed)
+throw'Blob has been released.';
+return _fs2.default.readFile(this._ref,encoding||'utf8');
+}},{key:'close',value:function close()
+
+
+
+
+
+
+{
+if(this._closed)
+return Promise.reject('Blob has been released.');
+this._closed=true;
+return _fs2.default.unlink(this._ref);
+}},{key:'_invokeOnCreateEvent',value:function _invokeOnCreateEvent()
+
+{
+log.verbose('invoke create event',this._onCreated);
+this._blobCreated=true;
+var fns=this._onCreated;
+for(var i in fns){
+if(typeof fns[i]==='function'){
+fns[i](this);
+}
+}
+delete this._onCreated;
+}},{key:'isDerived',get:function get(){return this._isDerived||false;}}]);return Blob;}(_EventTarget3.default);exports.default=Blob;
+
+
+
+
+
+
+
+function getBlobName(){
+return'blob-'+(0,_uuid2.default)();
+}
+
+
+
+
+
+
+
+
+function createMixedBlobData(ref,dataArray){
+
+var p=_fs2.default.writeFile(ref,'');
+var args=[];
+var size=0;
+for(var i in dataArray){
+var part=dataArray[i];
+if(!part)
+continue;
+if(part.isRNFetchBlobPolyfill){
+args.push([ref,part._ref,'uri']);
+}else
+if(typeof part==='string')
+args.push([ref,part,'utf8']);else
+
+
+
+
+if(Array.isArray(part))
+args.push([ref,part,'ascii']);
+}var _loop=function _loop(
+
+_i){
+p=p.then(function(written){
+var arg=this;
+if(written)
+size+=written;
+log.verbose('mixed blob write',args[_i],written);
+return _fs2.default.appendFile.apply(_fs2.default,babelHelpers.toConsumableArray(arg));
+}.bind(args[_i]));};for(var _i in args){_loop(_i);
+}
+return p.then(function(){return Promise.resolve(size);});
+}
+}, "react-native-fetch-blob/polyfill/Blob.js");
+__d(826 /* react-native-fetch-blob/utils/log.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var Log=function(){
+
+
+
+
+
+function Log(name){babelHelpers.classCallCheck(this,Log);this._isEnable=true;this._level=0;
+this._name=name;
+}babelHelpers.createClass(Log,[{key:'level',value:function level(
+
+val){
+this._level=val;
+}},{key:'enable',value:function enable()
+
+{
+this._isEnable=true;
+}},{key:'disable',value:function disable()
+
+{
+this._isEnable=false;
+}},{key:'verbose',value:function verbose()
+
+{var _console;for(var _len=arguments.length,args=Array(_len),_key=0;_key<_len;_key++){args[_key]=arguments[_key];}
+this._isEnable&&this._level>2&&(_console=console).log.apply(_console,[this._name,'verbose:'].concat(args));
+}},{key:'debug',value:function debug()
+
+{var _console2;for(var _len2=arguments.length,args=Array(_len2),_key2=0;_key2<_len2;_key2++){args[_key2]=arguments[_key2];}
+this._isEnable&&this._level>1&&(_console2=console).log.apply(_console2,[this._name,'debug:'].concat(args));
+}},{key:'info',value:function info()
+
+{var _console3;for(var _len3=arguments.length,args=Array(_len3),_key3=0;_key3<_len3;_key3++){args[_key3]=arguments[_key3];}
+this._isEnable&&this._level>0&&(_console3=console).log.apply(_console3,[this._name,'info:'].concat(args));
+}},{key:'error',value:function error()
+
+{var _console4;for(var _len4=arguments.length,args=Array(_len4),_key4=0;_key4<_len4;_key4++){args[_key4]=arguments[_key4];}
+this._isEnable&&this._level>-1&&(_console4=console).log.apply(_console4,[this._name,'error:'].concat(args));
+}}]);return Log;}();exports.default=Log;
+}, "react-native-fetch-blob/utils/log.js");
+__d(827 /* react-native-fetch-blob/polyfill/EventTarget.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+var _log=require(826 /* ../utils/log.js */);var _log2=babelHelpers.interopRequireDefault(_log);
+
+var log=new _log2.default('EventTarget');
+
+log.disable();var
+
+EventTarget=function(){
+
+
+
+function EventTarget(){babelHelpers.classCallCheck(this,EventTarget);
+log.info('constructor called');
+this.listeners={};
+}babelHelpers.createClass(EventTarget,[{key:'addEventListener',value:function addEventListener(
+
+
+
+
+
+
+type,cb){
+log.info('add event listener',type,cb);
+if(!(type in this.listeners)){
+this.listeners[type]=[];
+}
+this.listeners[type].push(cb);
+}},{key:'removeEventListener',value:function removeEventListener(
+
+
+
+
+
+
+
+type,cb){
+log.info('remove event listener',type,cb);
+if(!(type in this.listeners))
+return;
+var handlers=this.listeners[type];
+for(var i in handlers){
+if(cb===handlers[i]){
+handlers.splice(i,1);
+return this.removeEventListener(type,cb);
+}
+}
+}},{key:'dispatchEvent',value:function dispatchEvent(
+
+
+
+
+
+event){
+log.info('dispatch event',event);
+if(!(event.type in this.listeners))
+return;
+var handlers=this.listeners[event.type];
+for(var i in handlers){
+handlers[i].call(this,event);
+}
+
+}},{key:'clearEventListeners',value:function clearEventListeners()
+
+
+
+
+
+
+{
+for(var i in this.listeners){
+delete listeners[i];
+}
+}}]);return EventTarget;}();exports.default=EventTarget;
+}, "react-native-fetch-blob/polyfill/EventTarget.js");
+__d(828 /* react-native-fetch-blob/polyfill/File.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+var _fs=require(817 /* ../fs.js */);var _fs2=babelHelpers.interopRequireDefault(_fs);
+var _Blob2=require(825 /* ./Blob.js */);var _Blob3=babelHelpers.interopRequireDefault(_Blob2);var
+
+File=function(_Blob){babelHelpers.inherits(File,_Blob);babelHelpers.createClass(File,null,[{key:'build',value:function build(
+
+
+
+name,data,cType){
+return new Promise(function(resolve,reject){
+new File(data,cType).onCreated(function(f){
+f.name=name;
+resolve(f);
+});
+});
+}}]);
+
+function File(data,cType){babelHelpers.classCallCheck(this,File);var _this=babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(File).call(this,
+data,cType));_this.name='';return _this;
+}return File;}(_Blob3.default);exports.default=File;
+}, "react-native-fetch-blob/polyfill/File.js");
+__d(829 /* react-native-fetch-blob/polyfill/XMLHttpRequest.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+var _index=require(815 /* ../index.js */);var _index2=babelHelpers.interopRequireDefault(_index);
+var _XMLHttpRequestEventTarget=require(830 /* ./XMLHttpRequestEventTarget.js */);var _XMLHttpRequestEventTarget2=babelHelpers.interopRequireDefault(_XMLHttpRequestEventTarget);
+var _log=require(826 /* ../utils/log.js */);var _log2=babelHelpers.interopRequireDefault(_log);
+var _Blob=require(825 /* ./Blob.js */);var _Blob2=babelHelpers.interopRequireDefault(_Blob);
+var _ProgressEvent=require(831 /* ./ProgressEvent.js */);var _ProgressEvent2=babelHelpers.interopRequireDefault(_ProgressEvent);
+
+var log=new _log2.default('XMLHttpRequest');
+
+log.disable();
+
+
+var UNSENT=0;
+var OPENED=1;
+var HEADERS_RECEIVED=2;
+var LOADING=3;
+var DONE=4;var
+
+XMLHttpRequest=function(_XMLHttpRequestEventT){babelHelpers.inherits(XMLHttpRequest,_XMLHttpRequestEventT);babelHelpers.createClass(XMLHttpRequest,[{key:'UNSENT',get:function get()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{return UNSENT;}},{key:'OPENED',get:function get()
+{return OPENED;}},{key:'HEADERS_RECEIVED',get:function get()
+{return HEADERS_RECEIVED;}},{key:'LOADING',get:function get()
+{return LOADING;}},{key:'DONE',get:function get()
+{return DONE;}}],[{key:'addBinaryContentType',value:function addBinaryContentType(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+substr){
+for(var i in XMLHttpRequest.binaryContentTypes){
+if(new RegExp(substr,'i').test(XMLHttpRequest.binaryContentTypes[i])){
+return;
+}
+}
+XMLHttpRequest.binaryContentTypes.push(substr);
+
+}},{key:'removeBinaryContentType',value:function removeBinaryContentType(
+
+val){
+for(var i in XMLHttpRequest.binaryContentTypes){
+if(new RegExp(substr,'i').test(XMLHttpRequest.binaryContentTypes[i])){
+XMLHttpRequest.binaryContentTypes.splice(i,1);
+return;
+}
+}
+}},{key:'UNSENT',get:function get(){return UNSENT;}},{key:'OPENED',get:function get(){return OPENED;}},{key:'HEADERS_RECEIVED',get:function get(){return HEADERS_RECEIVED;}},{key:'LOADING',get:function get(){return LOADING;}},{key:'DONE',get:function get(){return DONE;}}]);
+
+function XMLHttpRequest(){babelHelpers.classCallCheck(this,XMLHttpRequest);
+log.verbose('XMLHttpRequest constructor called');var _this=babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(XMLHttpRequest).call(this));_this.upload=new _XMLHttpRequestEventTarget2.default();_this._readyState=UNSENT;_this._response='';_this._responseText=null;_this._responseHeaders={};_this._responseType='';_this._responseURL='';_this._responseXML='';_this._status=0;_this._statusText='';_this._timeout=60000;_this._sendFlag=false;_this._uploadStarted=false;_this._config={};_this._headers={'Content-Type':'text/plain'};return _this;
+
+}babelHelpers.createClass(XMLHttpRequest,[{key:'open',value:function open(
+
+
+
+
+
+
+
+
+
+
+
+method,url,async,user,password){
+log.verbose('XMLHttpRequest open ',method,url,async,user,password);
+this._method=method;
+this._url=url;
+this._headers={};
+this._dispatchReadStateChange(XMLHttpRequest.OPENED);
+}},{key:'send',value:function send(
+
+
+
+
+
+body){var _this2=this;
+this._body=body;
+if(this._readyState!==XMLHttpRequest.OPENED)
+throw'InvalidStateError : XMLHttpRequest is not opened yet.';
+var promise=Promise.resolve();
+this._sendFlag=true;
+log.verbose('XMLHttpRequest send ',body);var
+_method=this._method;var _url=this._url;var _headers=this._headers;
+log.verbose('sending request with args',_method,_url,_headers,body);
+log.verbose(typeof body,body instanceof FormData);
+
+if(body instanceof _Blob2.default){
+log.debug('sending blob body',body._blobCreated);
+promise=new Promise(function(resolve,reject){
+body.onCreated(function(blob){
+log.debug('body created send request');
+body=_index2.default.wrap(blob.getRNFetchBlobRef());
+resolve();
+});
+});
+}else
+if(typeof body==='object'){
+body=JSON.stringify(body);
+promise=Promise.resolve();
+}else
+{
+body=body?body.toString():body;
+promise=Promise.resolve();
+}
+
+promise.then(function(){
+log.debug('send request invoke',body);
+for(var h in _headers){
+_headers[h]=_headers[h].toString();
+}
+_this2._task=_index2.default.
+config({
+auto:true,
+timeout:_this2._timeout,
+binaryContentTypes:XMLHttpRequest.binaryContentTypes}).
+
+fetch(_method,_url,_headers,body);
+_this2._task.
+stateChange(_this2._headerReceived.bind(_this2)).
+uploadProgress(_this2._uploadProgressEvent.bind(_this2)).
+progress(_this2._progressEvent.bind(_this2)).
+catch(_this2._onError.bind(_this2)).
+then(_this2._onDone.bind(_this2));
+});
+}},{key:'overrideMimeType',value:function overrideMimeType(
+
+mime){
+log.verbose('XMLHttpRequest overrideMimeType',mime);
+this._headers['Content-Type']=mime;
+}},{key:'setRequestHeader',value:function setRequestHeader(
+
+name,value){
+log.verbose('XMLHttpRequest set header',name,value);
+if(this._readyState!==OPENED||this._sendFlag){
+throw'InvalidStateError : Calling setRequestHeader in wrong state  '+this._readyState;
+}
+
+if(typeof name!=='string'||/[^\u0000-\u00ff]/.test(name)){
+throw'TypeError : header field name should be a string';
+}
+
+var invalidPatterns=[
+/[\(\)\>\<\@\,\:\\\/\[\]\?\=\}\{\s\ \u007f\;\t\0\v\r]/,
+/tt/];
+
+for(var i in invalidPatterns){
+if(invalidPatterns[i].test(name)||typeof name!=='string'){
+throw'SyntaxError : Invalid header field name '+name;
+}
+}
+this._headers[name]=value;
+}},{key:'abort',value:function abort()
+
+{var _this3=this;
+log.verbose('XMLHttpRequest abort ');
+if(!this._task)
+return;
+this._task.cancel(function(err){
+var e={
+timeStamp:Date.now()};
+
+if(_this3.onabort)
+_this3.onabort();
+if(err){
+e.detail=err;
+e.type='error';
+_this3.dispatchEvent('error',e);
+}else
+{
+e.type='abort';
+_this3.dispatchEvent('abort',e);
+}
+});
+}},{key:'getResponseHeader',value:function getResponseHeader(
+
+field){
+log.verbose('XMLHttpRequest get header',field,this._responseHeaders);
+if(!this._responseHeaders)
+return null;
+return this._responseHeaders[field]||this._responseHeaders[field.toLowerCase()]||null;
+
+}},{key:'getAllResponseHeaders',value:function getAllResponseHeaders()
+
+{
+log.verbose('XMLHttpRequest get all headers',this._responseHeaders);
+if(!this._responseHeaders)
+return'';
+var result='';
+var respHeaders=this.responseHeaders;
+for(var i in respHeaders){
+result+=i+': '+respHeaders[i]+String.fromCharCode(0x0D,0x0A);
+}
+return result.substr(0,result.length-2);
+}},{key:'_headerReceived',value:function _headerReceived(
+
+e){
+log.debug('header received ',this._task.taskId,e);
+this.responseURL=this._url;
+if(e.state==="2"){
+this._responseHeaders=e.headers;
+this._statusText=e.status;
+this._responseType=e.respType||'';
+this._status=Math.floor(e.status);
+this._dispatchReadStateChange(XMLHttpRequest.HEADERS_RECEIVED);
+}
+}},{key:'_uploadProgressEvent',value:function _uploadProgressEvent(
+
+send,total){
+if(!this._uploadStarted){
+this.upload.dispatchEvent('loadstart');
+this._uploadStarted=true;
+}
+if(send>=total)
+this.upload.dispatchEvent('load');
+this.upload.dispatchEvent('progress',new _ProgressEvent2.default(true,send,total));
+}},{key:'_progressEvent',value:function _progressEvent(
+
+send,total){
+log.verbose(this.readyState);
+if(this._readyState===XMLHttpRequest.HEADERS_RECEIVED)
+this._dispatchReadStateChange(XMLHttpRequest.LOADING);
+var lengthComputable=false;
+if(total&&total>=0)
+lengthComputable=true;
+var e=new _ProgressEvent2.default(lengthComputable,send,total);
+this.dispatchEvent('progress',e);
+}},{key:'_onError',value:function _onError(
+
+err){
+var statusCode=Math.floor(this.status);
+if(statusCode>=100&&statusCode!==408){
+return;
+}
+log.debug('XMLHttpRequest error',err);
+this._statusText=err;
+this._status=String(err).match(/\d+/);
+this._status=this._status?Math.floor(this.status):404;
+this._dispatchReadStateChange(XMLHttpRequest.DONE);
+if(err&&String(err.message).match(/(timed\sout|timedout)/)||this._status==408){
+this.dispatchEvent('timeout');
+}
+this.dispatchEvent('loadend');
+this.dispatchEvent('error',{
+type:'error',
+detail:err});
+
+this.clearEventListeners();
+}},{key:'_onDone',value:function _onDone(
+
+resp){var _this4=this;
+log.debug('XMLHttpRequest done',this._url,resp,this);
+this._statusText=this._status;
+var responseDataReady=function responseDataReady(){
+_this4.dispatchEvent('load');
+_this4.dispatchEvent('loadend');
+_this4._dispatchReadStateChange(XMLHttpRequest.DONE);
+_this4.clearEventListeners();
+};
+if(resp){
+var info=resp.respInfo||{};
+log.debug(this._url,info,info.respType);
+switch(info.respType){
+case'json':
+try{
+this._responseText=resp.text();
+this._response=resp.json();
+responseDataReady();
+}catch(err){
+}
+break;
+case'blob':
+resp.blob().then(function(b){
+_this4._responseText=resp.text();
+_this4._response=b;
+responseDataReady();
+});
+break;
+default:
+this._responseText=resp.text();
+this._response=this.responseText;
+responseDataReady();
+break;}
+
+}
+
+}},{key:'_dispatchReadStateChange',value:function _dispatchReadStateChange(
+
+state){
+this._readyState=state;
+if(typeof this._onreadystatechange==='function')
+this._onreadystatechange();
+}},{key:'onreadystatechange',set:function set(
+
+fn){
+log.verbose('XMLHttpRequest set onreadystatechange',fn);
+this._onreadystatechange=fn;
+},get:function get()
+
+{
+return this._onreadystatechange;
+}},{key:'readyState',get:function get()
+
+{
+log.verbose('get readyState',this._readyState);
+return this._readyState;
+}},{key:'status',get:function get()
+
+{
+log.verbose('get status',this._status);
+return this._status;
+}},{key:'statusText',get:function get()
+
+{
+log.verbose('get statusText',this._statusText);
+return this._statusText;
+}},{key:'response',get:function get()
+
+{
+log.verbose('get response',this._response);
+return this._response;
+}},{key:'responseText',get:function get()
+
+{
+log.verbose('get responseText',this._responseText);
+return this._responseText;
+}},{key:'responseURL',get:function get()
+
+{
+log.verbose('get responseURL',this._responseURL);
+return this._responseURL;
+}},{key:'responseHeaders',get:function get()
+
+{
+log.verbose('get responseHeaders',this._responseHeaders);
+return this._responseHeaders;
+}},{key:'timeout',set:function set(
+
+val){
+this._timeout=val*1000;
+log.verbose('set timeout',this._timeout);
+},get:function get()
+
+{
+log.verbose('get timeout',this._timeout);
+return this._timeout;
+}},{key:'responseType',set:function set(
+
+val){
+log.verbose('set response type',this._responseType);
+this._responseType=val;
+},get:function get()
+
+{
+log.verbose('get response type',this._responseType);
+return this._responseType;
+}},{key:'isRNFBPolyfill',get:function get()
+
+{
+return true;
+}}]);return XMLHttpRequest;}(_XMLHttpRequestEventTarget2.default);XMLHttpRequest.binaryContentTypes=['image/','video/','audio/'];exports.default=XMLHttpRequest;
+}, "react-native-fetch-blob/polyfill/XMLHttpRequest.js");
+__d(830 /* react-native-fetch-blob/polyfill/XMLHttpRequestEventTarget.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+var _EventTarget2=require(827 /* ./EventTarget.js */);var _EventTarget3=babelHelpers.interopRequireDefault(_EventTarget2);
+var _log=require(826 /* ../utils/log.js */);var _log2=babelHelpers.interopRequireDefault(_log);
+
+var log=new _log2.default('XMLHttpRequestEventTarget');
+
+log.disable();var
+
+XMLHttpRequestEventTarget=function(_EventTarget){babelHelpers.inherits(XMLHttpRequestEventTarget,_EventTarget);
+
+
+
+
+
+
+
+
+
+function XMLHttpRequestEventTarget(){babelHelpers.classCallCheck(this,XMLHttpRequestEventTarget);var _this=babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(XMLHttpRequestEventTarget).call(this));_this._onabort=function(){};_this._onerror=function(){};_this._onload=function(){};_this._onloadstart=function(){};_this._onprogress=function(){};_this._ontimeout=function(){};_this._onloadend=function(){};
+
+log.info('constructor called');return _this;
+}babelHelpers.createClass(XMLHttpRequestEventTarget,[{key:'dispatchEvent',value:function dispatchEvent(
+
+event,e){
+babelHelpers.get(Object.getPrototypeOf(XMLHttpRequestEventTarget.prototype),'dispatchEvent',this).call(this,event,e);
+switch(event){
+case'abort':
+this._onabort(e);
+break;
+case'error':
+this._onerror(e);
+break;
+case'load':
+this._onload(e);
+break;
+case'loadstart':
+this._onloadstart(e);
+break;
+case'loadend':
+this._onloadend(e);
+break;
+case'progress':
+this._onprogress(e);
+break;
+case'timeout':
+this._ontimeout(e);
+break;}
+
+}},{key:'onabort',set:function set(
+
+fn){
+log.info('set onabort');
+this._onabort=fn;
+},get:function get()
+
+{
+return this._onabort;
+}},{key:'onerror',set:function set(
+fn){
+log.info('set onerror');
+this._onerror=fn;
+},get:function get()
+
+{
+return this._onerror;
+}},{key:'onload',set:function set(
+
+fn){
+log.info('set onload');
+this._onload=fn;
+},get:function get()
+
+{
+return this._onload;
+}},{key:'onloadstart',set:function set(
+
+fn){
+log.info('set onloadstart');
+this._onloadstart=fn;
+},get:function get()
+
+{
+return this._onloadstart;
+}},{key:'onprogress',set:function set(
+
+fn){
+log.info('set onprogress');
+this._onprogress=fn;
+},get:function get()
+
+{
+return this._onprogress;
+}},{key:'ontimeout',set:function set(
+
+fn){
+log.info('set ontimeout');
+this._ontimeout=fn;
+},get:function get()
+
+{
+return this._ontimeout;
+}},{key:'onloadend',set:function set(
+
+fn){
+log.info('set onloadend');
+this._onloadend=fn;
+},get:function get()
+
+{
+return this._onloadend;
+}}]);return XMLHttpRequestEventTarget;}(_EventTarget3.default);exports.default=XMLHttpRequestEventTarget;
+}, "react-native-fetch-blob/polyfill/XMLHttpRequestEventTarget.js");
+__d(831 /* react-native-fetch-blob/polyfill/ProgressEvent.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+var _Event2=require(832 /* ./Event */);var _Event3=babelHelpers.interopRequireDefault(_Event2);var
+
+ProgressEvent=function(_Event){babelHelpers.inherits(ProgressEvent,_Event);
+
+
+
+
+
+function ProgressEvent(lengthComputable,loaded,total){babelHelpers.classCallCheck(this,ProgressEvent);var _this=babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(ProgressEvent).call(this));_this._lengthComputable=false;_this._loaded=-1;_this._total=-1;
+
+_this._lengthComputable=lengthComputable;
+_this._loaded=loaded;
+_this._total=total;return _this;
+}babelHelpers.createClass(ProgressEvent,[{key:'lengthComputable',get:function get()
+
+{
+return this._lengthComputable;
+}},{key:'loaded',get:function get()
+
+{
+return this._loaded;
+}},{key:'total',get:function get()
+
+{
+return this._total;
+}}]);return ProgressEvent;}(_Event3.default);exports.default=ProgressEvent;
+}, "react-native-fetch-blob/polyfill/ProgressEvent.js");
+__d(832 /* react-native-fetch-blob/polyfill/Event.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var
+
+
+
+Event=
+
+function Event(){babelHelpers.classCallCheck(this,Event);
+
+};exports.default=Event;
+}, "react-native-fetch-blob/polyfill/Event.js");
+__d(833 /* react-native-fetch-blob/polyfill/FileReader.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+var _index=require(815 /* ../index.js */);var _index2=babelHelpers.interopRequireDefault(_index);
+var _ProgressEvent=require(831 /* ./ProgressEvent.js */);var _ProgressEvent2=babelHelpers.interopRequireDefault(_ProgressEvent);
+var _EventTarget2=require(827 /* ./EventTarget */);var _EventTarget3=babelHelpers.interopRequireDefault(_EventTarget2);
+var _Blob=require(825 /* ./Blob */);var _Blob2=babelHelpers.interopRequireDefault(_Blob);
+var _log=require(826 /* ../utils/log.js */);var _log2=babelHelpers.interopRequireDefault(_log);
+var _fs=require(817 /* ../fs */);var _fs2=babelHelpers.interopRequireDefault(_fs);
+
+var log=new _log2.default('FileReader');
+
+log.level(3);var
+
+FileReader=function(_EventTarget){babelHelpers.inherits(FileReader,_EventTarget);babelHelpers.createClass(FileReader,[{key:'isRNFBPolyFill',get:function get()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{return true;}}],[{key:'EMPTY',get:function get(){return 0;}},{key:'LOADING',get:function get(){return 1;}},{key:'DONE',get:function get(){return 2;}}]);
+
+
+
+
+
+
+
+
+
+function FileReader(){babelHelpers.classCallCheck(this,FileReader);var _this=babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(FileReader).call(this));_this._readState=0;
+
+log.verbose('file reader const');
+_this._result=null;return _this;
+}babelHelpers.createClass(FileReader,[{key:'abort',value:function abort()
+
+{
+log.verbose('abort',b,label);
+}},{key:'readAsArrayBuffer',value:function readAsArrayBuffer(
+
+b){
+log.verbose('readAsArrayBuffer',b,label);
+}},{key:'readAsBinaryString',value:function readAsBinaryString(
+
+b){
+log.verbose('readAsBinaryString',b,label);
+}},{key:'readAsText',value:function readAsText(
+
+b,label){
+log.verbose('readAsText',b,label);
+}},{key:'readAsDataURL',value:function readAsDataURL(
+
+b){
+log.verbose('readAsDataURL',b,label);
+}},{key:'dispatchEvent',value:function dispatchEvent(
+
+event,e){
+log.verbose('dispatch event',event,e);
+babelHelpers.get(Object.getPrototypeOf(FileReader.prototype),'dispatchEvent',this).call(this,event,e);
+if(typeof this['on'+event]==='function'){
+this['on'+event](e);
+}
+}},{key:'readState',get:function get()
+
+
+
+
+
+{
+return this._readyState;
+}},{key:'result',get:function get()
+
+{
+return this._result;
+}}]);return FileReader;}(_EventTarget3.default);exports.default=FileReader;
+}, "react-native-fetch-blob/polyfill/FileReader.js");
+__d(834 /* react-native-fetch-blob/polyfill/Fetch.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var _index=require(815 /* ../index.js */);var _index2=babelHelpers.interopRequireDefault(_index);
+var _log=require(826 /* ../utils/log.js */);var _log2=babelHelpers.interopRequireDefault(_log);
+var _fs=require(817 /* ../fs */);var _fs2=babelHelpers.interopRequireDefault(_fs);
+var _unicode=require(835 /* ../utils/unicode */);var _unicode2=babelHelpers.interopRequireDefault(_unicode);
+var _Blob=require(825 /* ./Blob */);var _Blob2=babelHelpers.interopRequireDefault(_Blob);
+
+var log=new _log2.default('FetchPolyfill');
+
+log.disable();var
+
+
+Fetch=
+
+function Fetch(config){babelHelpers.classCallCheck(this,Fetch);
+babelHelpers.extends(this,new RNFetchBlobFetchPolyfill(config));
+};exports.default=Fetch;var
+
+
+
+RNFetchBlobFetchPolyfill=
+
+function RNFetchBlobFetchPolyfill(config){babelHelpers.classCallCheck(this,RNFetchBlobFetchPolyfill);
+this.build=function(){return function(url){var options=arguments.length<=1||arguments[1]===undefined?{}:arguments[1];
+
+var body=options.body;
+var promise=Promise.resolve();
+var blobCache=null;
+
+options.headers=options.headers||{};
+var ctype=options['Content-Type']||options['content-type'];
+var ctypeH=options.headers['Content-Type']||options.headers['content-type'];
+options.headers['Content-Type']=ctype||ctypeH;
+options.headers['content-type']=ctype||ctypeH;
+options.method=options.method||'GET';
+
+if(body){
+
+
+if(body instanceof FormData){
+log.verbose('convert FormData to blob body');
+promise=_Blob2.default.build(body).then(function(b){
+blobCache=b;
+options.headers['Content-Type']='multipart/form-data;boundary='+b.multipartBoundary;
+return Promise.resolve(_index2.default.wrap(b._ref));
+});
+}else
+
+if(body.isRNFetchBlobPolyfill)
+promise=Promise.resolve(_index2.default.wrap(body.blobPath));else
+if(typeof body!=='object')
+promise=Promise.resolve(JSON.stringify(body));else
+if(typeof body!=='string')
+promise=Promise.resolve(body.toString());else
+
+
+promise=Promise.resolve(body);
+}
+
+
+
+
+var task=promise.
+then(function(body){
+return _index2.default.config(config).
+fetch(options.method,url,options.headers,body);
+});
+
+var statefulPromise=task.then(function(resp){
+log.verbose('response',resp);
+
+if(blobCache!==null&&blobCache instanceof _Blob2.default)
+blobCache.close();
+return Promise.resolve(new RNFetchBlobFetchRepsonse(resp));
+});
+
+
+statefulPromise.cancel=task.cancel;
+statefulPromise.progress=task.progress;
+statefulPromise.uploadProgress=task.uploadProgress;
+
+return statefulPromise;
+
+};};
+};var
+
+
+
+RNFetchBlobFetchRepsonse=function(){
+
+function RNFetchBlobFetchRepsonse(resp){babelHelpers.classCallCheck(this,RNFetchBlobFetchRepsonse);
+var info=resp.info();
+this.headers=info.headers;
+this.ok=info.status>=200&&info.status<=299,
+this.status=info.status;
+this.type='basic';
+this.bodyUsed=false;
+this.resp=resp;
+this.rnfbRespInfo=info;
+this.rnfbResp=resp;
+}babelHelpers.createClass(RNFetchBlobFetchRepsonse,[{key:'rawResp',value:function rawResp()
+
+{
+return Promise.resolve(this.rnfbResp);
+}},{key:'arrayBuffer',value:function arrayBuffer()
+
+{
+log.verbose('to arrayBuffer',this.rnfbRespInfo);
+this.bodyUsed=true;
+return readArrayBuffer(this.rnfbResp,this.rnfbRespInfo);
+}},{key:'text',value:function text()
+
+{
+log.verbose('to text',this.rnfbResp,this.rnfbRespInfo);
+this.bodyUsed=true;
+return readText(this.rnfbResp,this.rnfbRespInfo);
+}},{key:'json',value:function json()
+
+{
+log.verbose('to json',this.rnfbResp,this.rnfbRespInfo);
+this.bodyUsed=true;
+return readJSON(this.rnfbResp,this.rnfbRespInfo);
+}},{key:'blob',value:function blob()
+
+{
+log.verbose('to blob',this.rnfbResp,this.rnfbRespInfo);
+this.bodyUsed=true;
+return readBlob(this.rnfbResp,this.rnfbRespInfo);
+}}]);return RNFetchBlobFetchRepsonse;}();
+
+
+
+
+
+
+
+
+function readArrayBuffer(resp,info){
+switch(info.rnfbEncode){
+case'path':
+return resp.readFile('ascii');
+break;
+default:
+var buffer=[];
+var str=resp.text();
+for(var i in str){
+buffer[i]=str.charCodeAt(i);
+}
+return Promise.resolve(buffer);
+break;}
+
+}
+
+
+
+
+
+
+
+function readText(resp,info){
+switch(info.rnfbEncode){
+case'base64':
+return Promise.resolve(resp.text());
+break;
+case'path':
+return resp.text();
+break;
+default:
+return Promise.resolve(resp.text());
+break;}
+
+}
+
+
+
+
+
+
+
+
+function readBlob(resp,info){
+log.verbose('readBlob',resp,info);
+return resp.blob();
+}
+
+
+
+
+
+
+
+function readJSON(resp,info){
+log.verbose('readJSON',resp,info);
+switch(info.rnfbEncode){
+case'base64':
+return Promise.resolve(resp.json());
+case'path':
+return resp.json();
+default:
+return Promise.resolve(resp.json());}
+
+}
+}, "react-native-fetch-blob/polyfill/Fetch.js");
+__d(835 /* react-native-fetch-blob/utils/unicode.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});exports.default=function(x){
+var r=/\\u([\d\w]{4})/gi;
+x=x.replace(r,function(match,grp){
+return String.fromCharCode(parseInt(grp,16));
+});
+return unescape(x);
+};
+}, "react-native-fetch-blob/utils/unicode.js");
+__d(836 /* react-native-fetch-blob/android.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});
+
+
+
+
+var _reactNative=require(43 /* react-native */);
+
+
+
+
+
+
+var RNFetchBlob=_reactNative.NativeModules.RNFetchBlob;
+
+
+
+
+
+
+
+function actionViewIntent(path){var mime=arguments.length<=1||arguments[1]===undefined?'text/plain':arguments[1];
+if(_reactNative.Platform.OS==='android')
+return RNFetchBlob.actionViewIntent(path,mime);else
+
+return Promise.reject('RNFetchBlob.actionViewIntent only supports Android.');
+}exports.default=
+
+
+{
+actionViewIntent:actionViewIntent};
+}, "react-native-fetch-blob/android.js");
+__d(837 /* react-native-image-picker/index.js */, function(global, require, module, exports) {'use strict';var _require=
 
 require(43 /* react-native */);var NativeModules=_require.NativeModules;var
 ImagePickerManager=NativeModules.ImagePickerManager;
@@ -91478,9 +94016,9 @@ options={};
 return ImagePickerManager.showImagePicker(babelHelpers.extends({},DEFAULT_OPTIONS,options),callback);
 }});
 }, "react-native-image-picker/index.js");
-__d(816 /* TBP/images/app_bg.png */, function(global, require, module, exports) {module.exports = require(169 /* react-native/Libraries/Image/AssetRegistry */).registerAsset({"__packager_asset":true,"fileSystemLocation":"/var/React/TBP/images","httpServerLocation":"/assets/images","width":900,"height":1500,"scales":[1],"files":["/var/React/TBP/images/app_bg.png"],"hash":"6ab2770dfd188c494d276c2d5db1d6ce","name":"app_bg","type":"png"});
+__d(838 /* TBP/images/app_bg.png */, function(global, require, module, exports) {module.exports = require(169 /* react-native/Libraries/Image/AssetRegistry */).registerAsset({"__packager_asset":true,"fileSystemLocation":"/var/React/TBP/images","httpServerLocation":"/assets/images","width":900,"height":1500,"scales":[1],"files":["/var/React/TBP/images/app_bg.png"],"hash":"6ab2770dfd188c494d276c2d5db1d6ce","name":"app_bg","type":"png"});
 }, "TBP/images/app_bg.png");
-__d(817 /* TBP/components/Home.js */, function(global, require, module, exports) {'use strict';Object.defineProperty(exports,"__esModule",{value:true});
+__d(839 /* TBP/components/Home.js */, function(global, require, module, exports) {'use strict';Object.defineProperty(exports,"__esModule",{value:true});
 
 var _react=require(12 /* react */);var _react2=babelHelpers.interopRequireDefault(_react);
 
@@ -91499,11 +94037,11 @@ var _reactNative=require(43 /* react-native */);
 
 
 var _config=require(645 /* ./config */);var _config2=babelHelpers.interopRequireDefault(_config);
-var _reactNativeActionButton=require(818 /* react-native-action-button */);var _reactNativeActionButton2=babelHelpers.interopRequireDefault(_reactNativeActionButton);
+var _reactNativeActionButton=require(840 /* react-native-action-button */);var _reactNativeActionButton2=babelHelpers.interopRequireDefault(_reactNativeActionButton);
 var _Ionicons=require(814 /* react-native-vector-icons/Ionicons */);var _Ionicons2=babelHelpers.interopRequireDefault(_Ionicons);
 var _reactNativeRouterFlux=require(646 /* react-native-router-flux */);
 var _Modal=require(809 /* ./Modal */);var _Modal2=babelHelpers.interopRequireDefault(_Modal);
-var _NoInternet=require(820 /* ./NoInternet */);var _NoInternet2=babelHelpers.interopRequireDefault(_NoInternet);var STORAGE_KEY="@TBP:user";
+var _NoInternet=require(842 /* ./NoInternet */);var _NoInternet2=babelHelpers.interopRequireDefault(_NoInternet);var STORAGE_KEY="@TBP:user";
 var addContactIcon=_react2.default.createElement(_Ionicons2.default,{name:'ios-person-add-outline',size:35,color:'#FFFFFF'});
 var menuIcon=_react2.default.createElement(_Ionicons2.default,{name:'md-apps',size:35,color:'#FFFFFF'});
 var person=_react2.default.createElement(_Ionicons2.default,{name:'ios-person',size:25,color:'#0680cd'});
@@ -91617,7 +94155,7 @@ return(
 _react2.default.createElement(_reactNative.View,{style:styles.container},
 _react2.default.createElement(_reactNative.View,{style:[styles.fixed]},
 _react2.default.createElement(_reactNative.Image,{
-source:require(816 /* ../images/app_bg.png */),
+source:require(838 /* ../images/app_bg.png */),
 style:{flex:1,width:null,height:null,resizeMode:'stretch',opacity:0.2}})),
 
 _react2.default.createElement(_reactNative.View,{style:{flex:1,justifyContent:'center',alignItems:'center',flexDirection:'column'}},
@@ -91640,7 +94178,7 @@ return(
 _react2.default.createElement(_reactNative.View,{style:styles.container},
 _react2.default.createElement(_reactNative.View,{style:[styles.fixed]},
 _react2.default.createElement(_reactNative.Image,{
-source:require(816 /* ../images/app_bg.png */),
+source:require(838 /* ../images/app_bg.png */),
 style:{flex:1,width:null,height:null,resizeMode:'stretch',opacity:0.2}})),
 
 _react2.default.createElement(_reactNative.ListView,{
@@ -91683,7 +94221,7 @@ return(
 _react2.default.createElement(_reactNative.View,{style:[styles.container,{justifyContent:'center',alignItems:'center'}]},
 _react2.default.createElement(_reactNative.View,{style:[styles.fixed]},
 _react2.default.createElement(_reactNative.Image,{
-source:require(816 /* ../images/app_bg.png */),
+source:require(838 /* ../images/app_bg.png */),
 style:{flex:1,width:null,height:null,resizeMode:'stretch',opacity:0.2}})),
 
 _react2.default.createElement(_Modal2.default,{visible:this.state.isLoading})));
@@ -91750,9 +94288,9 @@ bottom:0}});exports.default=
 
 Home;
 }, "TBP/components/Home.js");
-__d(818 /* react-native-action-button/ActionButton.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var _react=require(12 /* react */);var _react2=babelHelpers.interopRequireDefault(_react);
+__d(840 /* react-native-action-button/ActionButton.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var _react=require(12 /* react */);var _react2=babelHelpers.interopRequireDefault(_react);
 var _reactNative=require(43 /* react-native */);
-var _ActionButtonItem=require(819 /* ./ActionButtonItem */);var _ActionButtonItem2=babelHelpers.interopRequireDefault(_ActionButtonItem);
+var _ActionButtonItem=require(841 /* ./ActionButtonItem */);var _ActionButtonItem2=babelHelpers.interopRequireDefault(_ActionButtonItem);
 
 var alignItemsMap={
 "center":"center",
@@ -92074,7 +94612,7 @@ flex:1,
 justifyContent:'flex-end',
 flexDirection:'column'}});
 }, "react-native-action-button/ActionButton.js");
-__d(819 /* react-native-action-button/ActionButtonItem.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var _react=require(12 /* react */);var _react2=babelHelpers.interopRequireDefault(_react);
+__d(841 /* react-native-action-button/ActionButtonItem.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var _react=require(12 /* react */);var _react2=babelHelpers.interopRequireDefault(_react);
 var _reactNative=require(43 /* react-native */);var _Dimensions$get=
 _reactNative.Dimensions.get('window');var width=_Dimensions$get.width;
 
@@ -92207,7 +94745,7 @@ actionText:{
 flex:1,
 fontSize:16}});
 }, "react-native-action-button/ActionButtonItem.js");
-__d(820 /* TBP/components/NoInternet.js */, function(global, require, module, exports) {'use strict';Object.defineProperty(exports,"__esModule",{value:true});
+__d(842 /* TBP/components/NoInternet.js */, function(global, require, module, exports) {'use strict';Object.defineProperty(exports,"__esModule",{value:true});
 
 var _react=require(12 /* react */);var _react2=babelHelpers.interopRequireDefault(_react);
 
@@ -92242,7 +94780,7 @@ alignItems:'center'}});exports.default=
 
 NoInternet;
 }, "TBP/components/NoInternet.js");
-__d(821 /* TBP/components/AddContact.js */, function(global, require, module, exports) {'use strict';Object.defineProperty(exports,"__esModule",{value:true});
+__d(843 /* TBP/components/AddContact.js */, function(global, require, module, exports) {'use strict';Object.defineProperty(exports,"__esModule",{value:true});
 
 var _react=require(12 /* react */);var _react2=babelHelpers.interopRequireDefault(_react);
 
@@ -92265,7 +94803,7 @@ var _reactNativeRouterFlux=require(646 /* react-native-router-flux */);
 var _Modal=require(809 /* ./Modal */);var _Modal2=babelHelpers.interopRequireDefault(_Modal);
 var _keyboarddismiss=require(644 /* ./keyboarddismiss */);var _keyboarddismiss2=babelHelpers.interopRequireDefault(_keyboarddismiss);var STORAGE_KEY='@TBP:user';
 var tick=_react2.default.createElement(_MaterialIcons2.default,{name:'check',size:15,color:'#2b2b2b'});
-var wrong=_react2.default.createElement(_MaterialIcons2.default,{name:'eroor',size:15,color:'#DF6126'});var
+var wrong=_react2.default.createElement(_MaterialIcons2.default,{name:'error',size:15,color:'#DF6126'});var
 
 
 AddContact=function(_Component){babelHelpers.inherits(AddContact,_Component);
@@ -92300,7 +94838,7 @@ this._fetchUserId().done(function(){
 _this2._saveContacttoServer(_this2.state.name,
 _this2.state.contact,_this2.state.email,
 _this2.state.area).done(function(response){
-alert(JSON.stringify(response));
+
 if(response){
 if(response.Android[0].result=="Success"){
 
@@ -92341,7 +94879,7 @@ return(
 _react2.default.createElement(_reactNative.View,{style:styles.container},
 _react2.default.createElement(_reactNative.View,{style:[styles.fixed,{flex:1}]},
 _react2.default.createElement(_reactNative.Image,{
-source:require(816 /* ../images/app_bg.png */),
+source:require(838 /* ../images/app_bg.png */),
 style:{flex:1,width:null,height:null,resizeMode:'stretch',opacity:0.2}}),
 _react2.default.createElement(_Modal2.default,{visible:this.state.isLoading})),
 
@@ -92598,7 +95136,7 @@ borderRadius:2}});exports.default=
 
 AddContact;
 }, "TBP/components/AddContact.js");
-__d(822 /* TBP/images/bg.png */, function(global, require, module, exports) {module.exports = require(169 /* react-native/Libraries/Image/AssetRegistry */).registerAsset({"__packager_asset":true,"fileSystemLocation":"/var/React/TBP/images","httpServerLocation":"/assets/images","width":900,"height":1500,"scales":[1],"files":["/var/React/TBP/images/bg.png"],"hash":"22627322fad68309d34f6d8425c9eac0","name":"bg","type":"png"});
+__d(844 /* TBP/images/bg.png */, function(global, require, module, exports) {module.exports = require(169 /* react-native/Libraries/Image/AssetRegistry */).registerAsset({"__packager_asset":true,"fileSystemLocation":"/var/React/TBP/images","httpServerLocation":"/assets/images","width":900,"height":1500,"scales":[1],"files":["/var/React/TBP/images/bg.png"],"hash":"22627322fad68309d34f6d8425c9eac0","name":"bg","type":"png"});
 }, "TBP/images/bg.png");
 ;require(191);
 ;require(0);

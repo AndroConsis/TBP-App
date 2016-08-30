@@ -30,11 +30,8 @@ var ImagePicker = require('react-native-image-picker');
 import SignatureCapture from 'react-native-signature-capture';
 import CheckBox from './checkbox';
 
-const _XHR = GLOBAL.originalXMLHttpRequest ?  
-    GLOBAL.originalXMLHttpRequest :           
-    GLOBAL.XMLHttpRequest                     
+import RNFetchBlob from 'react-native-fetch-blob';
 
-XMLHttpRequest = _XHR;
 
 var options = {
   title: 'Select Image',
@@ -108,6 +105,9 @@ class Registration extends Component {
       showSignature : false,
       showSignatureScreen: false,
       isChecked: false,
+      representative_number: '',
+      show_representative_number: false,
+      valid_representative_number: false,
     };
   }
 
@@ -249,90 +249,48 @@ _pickImage(imageFor) {
     k();
   	if(this.state.validName && this.state.validEmail && this.state.validMob && this.state.validOccupation && this.state.validPancard
         && this.state.validIdNo && (this.state.address.length > 0) && this.confirmPassword() && this.state.validImage
-        && this.state.validSignature && this.state.validBackImage && this.state.validFrontImage && this.state.validPancardImage && this.state.isChecked) {
+        && this.state.validSignature && this.state.validBackImage && this.state.validFrontImage && this.state.validPancardImage 
+        && this.state.isChecked && this.state.valid_representative_number) {
       this.setState({
           loading : true,
         })
-    
-        var photo = {
-            uri: this.state.userImageUrl,
-            type: 'image/jpg',
-            name: this.state.name+".jpg"
-          }
-      var pancardImage = {
-        uri : this.state.userPancardUrl,
-        type: 'image/jpg',
-        name:this.state.name+ "_pancard.jpg"
-      }
-      var Front = {
-        uri : this.state.idFrontImageURL,
-        type: 'image/jpg',
-        name: this.state.name +"_id_front_image.jpg"
-      }
-      var Back ={
-        uri : this.state.idBackImageURL,
-        type: 'image/jpg',
-        name: this.state.name +"_id_back_image.jpg"
-      }
-      var Signature = {
-        uri: this.state.signatureURL,
-        file: 'image/jpg',
-        name: this.state.name+"_signature.jpg"
-      }
-      var body = new FormData();
-      body.append('image', photo);
-      body.append('name', this.state.name);
-      body.append('address', this.state.address);
-      body.append('mobile_no', this.state.mobile_no);
-      body.append('alt_mobile_no', this.state.alt_mobile_no);
-      body.append('email', this.state.email);
-      body.append('password', this.state.password);
-      body.append('pancard_no', this.state.pancard_no);
-      body.append('occupation', this.state.occupation);
-      body.append('referancename', this.state.referancename)
-      body.append('firebaseid', "");
-      body.append('pancard_image', pancardImage);
-      body.append('id_front_photo', Front);
-      body.append('id_back_photo', Back);
-      body.append('signature', Signature);
-      body.append('id_type', this.state.idType);
-      body.append('id_number', this.state.idNumber);
-      var xhr = new XMLHttpRequest();
-      xhr.open('POST', "http://tajbusinessopportunity.com/tbp/user-register");
-      xhr.send(body);
-      xhr.onload = () => {
-        alert(xhr.responseText);
-        if(xhr.status !== 200) {
-          alert("Failed : Some Error Occured Please check your credentials again")
-          this.setState({
-            loading: false,
-          })
-          return;
-        };
-        if(JSON.parse(xhr.responseText).Android[0].result == "Success") {
-          alert("Registration Successful please Login with your credentials")
-          Actions.login({type: 'reset'});
-          Actions.refresh();
-          this.setState({
-              loading: false
-          })
-        } 
 
-        if(JSON.parse(xhr.responseText).Android[0].result == "Failed") {
-          alert(JSON.parse(xhr.responseText).Android[0].msg);
-          this.setState({
-              loading: false
-          })
+      RNFetchBlob.fetch('POST', 'http://tajbusinessopportunity.com/tbp/user-register', {
+        'Content-Type' : 'multipart/form-data'
+      }, [
+      {name : 'image', filename: this.state.name+"_image.jpg", type: 'image/jpg', data: RNFetchBlob.wrap(this.state.imageUrl)},
+      {name : 'pancard_image', filename: this.state.name+"_pancard.jpg", type: 'image/jpg', data: RNFetchBlob.wrap(this.state.userPancardUrl)},
+      {name : 'id_front_photo', filename: this.state.name+"_id_front_photo.jpg", type: 'image/jpg', data: RNFetchBlob.wrap(this.state.idFrontImageURL)},
+      {name : 'id_back_photo', filename: this.state.name+"_id_back_photo.jpg", type: 'image/jpg', data: RNFetchBlob.wrap(this.state.idBackImageURL)},
+      {name : 'signature', filename: this.state.name+"_signature.jpg", type: 'image/png', data: RNFetchBlob.wrap(this.state.signatureURL)},
+      {name : 'name', data: this.state.name},
+      {name : 'address', data: this.state.address },
+      {name : 'mobile_no', data : this.state.mobile_no },
+      {name : 'alt_mobile_no', data : this.state.address},
+      {name : 'email', data : this.state.email},
+      {name : 'password', data : this.state.password},
+      {name : 'pancard_no', data : this.state.pancard_no},
+      {name : 'occupation', data : this.state.occupation},
+      {name : 'referancename', data : this.state.referancename},
+      {name : 'firebaseid', data : ""},
+      {name : 'id_type', data : this.state.idType},
+      {name : 'id_number', data : this.state.idNumber},
+      {name : 'representative_number', data : this.state.representative_number},
+      ]).then((resp) => {
+        this.setState({loading: false});
+        if(JSON.parse(resp).Android[0].result == "Success") {
+            alert("Registration Successful please Login with your credentials");
+             Actions.login({type: 'reset'});
+             Actions.refresh();
+        } else if( JSON.parse(resp).Android[0].result == "Failed") {
+            alert("Failed : " + JSON.parse(resp).Android[0].msg)
+        } else {
+          alert("Some Error Occured Please Try Again.")
         }
-
-        else {
-             alert("Failed: \n" + JSON.parse(xhr.responseText).Android[0].msg)
-             this.setState({
-              loading: false
-            })
-        }
-        
-	};
+      }).catch((err) => {
+        this.setState({loading: false});
+        alert("Unable to connect to server right now, Please try after some time.");
+      })
 	
  } else {
     alert("Please fill proper credentials");
@@ -344,6 +302,12 @@ _pickImage(imageFor) {
       showBackImage : true,
       showIdNo : true,
       showIdType : true,
+      showName : true,
+      showEmail : true,
+      showMob : true,
+      showcp : true,
+      showOccption : true,
+      show_representative_number: true,
     });
  }
 }
@@ -717,7 +681,33 @@ _pickImage(imageFor) {
         		style={styles.textInput}
         		ref="10"
 	      	    onSubmitEditing={() => k()}/>
-	      	    
+	      	
+          <Text>Representative Mobile No{
+            this.state.show_representative_number 
+            ? ( this.state.valid_representative_number 
+              ? 
+              (<Icon name="check" size={15} color="#2b2b2b"/>) 
+              : 
+              (<Icon name="error" size={15} color="#DF6126"/>)
+            
+            ) : (<Text></Text>)}</Text>
+          
+          <TextInput            
+            onChange={(event) => {this.setState({
+                          representative_number: event.nativeEvent.text,
+                          show_representative_number  : true,
+                        });
+              if(event.nativeEvent.text == ''){
+                  this.setState({valid_representative_number : false})
+              } else {
+                   if(this.validateMobile(event.nativeEvent.text)){this.setState({valid_representative_number: true})} else {this.setState({valid_representative_number: false})};
+            }}}
+            value={this.state.representative_number}
+            returnKeyType="next"
+            keyboardType='numeric'
+            style={styles.textInput}
+            ref="10"
+              onSubmitEditing={() => k()}/>
         	<Text>Reference No</Text>
         	
         	<TextInput        		
@@ -729,7 +719,7 @@ _pickImage(imageFor) {
         		
         		style={styles.textInput}
         		ref="12"
-	      	    onSubmitEditing={() => this._submit()}/>
+	      	    onSubmitEditing={() => k()}/>
 	      	
 
           <Text style={{alignSelf: 'center'}}>Add Your Signature{

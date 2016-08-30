@@ -21,7 +21,7 @@ import { Actions } from 'react-native-router-flux';
 import Spinner from './Modal';
 import k from './keyboarddismiss';
 const tick = (<Icon name="check" size={15} color="#2b2b2b"/>)
-const wrong = (<Icon name="eroor" size={15} color="#DF6126"/>)
+const wrong = (<Icon name="error" size={15} color="#DF6126"/>)
 
 
 class AddContact extends Component {
@@ -56,7 +56,7 @@ class AddContact extends Component {
               this._saveContacttoServer(this.state.name, 
                   this.state.contact, this.state.email, 
                   this.state.area).done((response) => {
-                    alert(JSON.stringify(response))
+                    
                     if (response) {
                       if (response.Android[0].result == "Success") {
                         // Success
